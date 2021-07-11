@@ -1,6 +1,6 @@
 import express from "express";
 import { log } from "../logger";
-import { getAll } from "../services/article";
+import { get, getAll } from "../services/article";
 import { serializeNonDefaultTypes } from "./utils";
 
 export default {
@@ -27,6 +27,25 @@ export default {
           error
         );
         res.status(500).send("There was an error fetching the Articles");
+      }
+    });
+
+    /**
+     * Retrieve single the article
+     */
+    app.get(`/${prefix}/:id`, async (req, res) => {
+      try {
+        const retrievedArticle = await get(parseInt(req.params.id));
+        const articleParsed = serializeNonDefaultTypes(
+          retrievedArticle.article
+        );
+        res.json(articleParsed);
+      } catch (error) {
+        log.error(
+          "Error invoking `get` from `retrievedArticle`. Details:",
+          error
+        );
+        res.status(500).send("There was an error fetching the Product");
       }
     });
   },

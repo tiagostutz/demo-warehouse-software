@@ -1,6 +1,6 @@
 import express from "express";
 import { log } from "../logger";
-import { getAll } from "../services/product";
+import { get, getAll } from "../services/product";
 import { serializeNonDefaultTypes } from "./utils";
 
 export default {
@@ -27,6 +27,25 @@ export default {
           error
         );
         res.status(500).send("There was an error fetching the Products");
+      }
+    });
+
+    /**
+     * Retrieve single the product
+     */
+    app.get(`/${prefix}/:id`, async (req, res) => {
+      try {
+        const retrievedProduct = await get(parseInt(req.params.id));
+        const productParsed = serializeNonDefaultTypes(
+          retrievedProduct.product
+        );
+        res.json(productParsed);
+      } catch (error) {
+        log.error(
+          "Error invoking `get` from `retrievedProduct`. Details:",
+          error
+        );
+        res.status(500).send("There was an error fetching the Product");
       }
     });
   },
