@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
-    "sourceMap": true,
     "outDir": "dist",
-    "strict": true,
-    "lib": ["esnext", "dom"],
-    "esModuleInterop": true
-  }
+    "rootDir": "src",
+    "esModuleInterop": true,
+    "lib": ["esnext"],
+    "strict": true
+  },
+  "include": ["src/**/*"]
 }
