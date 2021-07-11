@@ -79,6 +79,17 @@ Check the metrics at [https://localhost:4002](https://localhost:4002) with the f
 
 ### Prisma as an ORM
 
+What happens when running:
+
+```bash
+yarn install @prisma/client
+```
+
+The install command automatically invokes prisma generate for you which reads your Prisma schema and generates a version of Prisma Client that is tailored to your models.
+Whenever you make changes to your Prisma schema in the future, you manually need to invoke `npx prisma generate` in order to accomodate the changes in your Prisma Client API.
+
+- More at https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/install-prisma-client-typescript-postgres/
+
 - Used the defaults of Prisma to generate a Database, but if the data modeling would be subject to a Data Administration process with data/terms dictionary, conventions, abbreviations and that kind of stuff, some additional configuration would be needed on the [schema.prisma](api-backend/schema.prisma) definition.
 
 ```bash

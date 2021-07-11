@@ -10,7 +10,7 @@ generator client {
 
 model Article {
   id             Int                  @id @default(autoincrement())
-  identification Int
+  identification Int                  @unique
   name           String
   availableStock Int                  @default(0)
   products       ArticlesOnProducts[]

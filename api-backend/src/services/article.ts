@@ -1,5 +1,5 @@
-import { Article, PrismaClient } from '@prisma/client';
-import { log } from '../logger';
+import { Article, PrismaClient } from "@prisma/client";
+import { log } from "../logger";
 
 const prisma = new PrismaClient();
 
@@ -20,6 +20,36 @@ export type ArticleReturnList = {
 // ------
 
 /**
+ * Writes an Article to the database
+ *
+ * @param article article to be created
+ * @returns the created Article
+ */
+export const create = async (
+  article: Article
+): Promise<ArticleReturnSingle> => {
+  try {
+    // get only the necessary attributes to write do Database
+    // for instance, the `id` is not passed because the column is autoincrement (serial)
+    const { identification, name, availableStock } = article;
+    const articleCreated = await prisma.article.create({
+      data: { identification, name, availableStock },
+    });
+    return {
+      article: articleCreated,
+      error: null,
+    };
+  } catch (error) {
+    log.error("Error creating an Article. Details:", error);
+    return {
+      article: null,
+      error:
+        "Error inserting an Article to the database. Check the logs for more details",
+    };
+  }
+};
+
+/**
  * Fetches a single article with primary key = param id
  *
  * @param id primary key value of the fetching Article
@@ -34,11 +64,11 @@ export const get = async (id: number): Promise<ArticleReturnSingle> => {
     });
     return { article: single, error: null };
   } catch (error) {
-    log.error('Error fetching One Article by Id');
+    log.error("Error fetching One Article by Id. Details:", error);
     return {
       article: null,
       error:
-        'Error fetching One Article by Id. Check the logs for more details',
+        "Error fetching One Article by Id. Check the logs for more details",
     };
   }
 };
@@ -50,7 +80,7 @@ export const get = async (id: number): Promise<ArticleReturnSingle> => {
  * @returns Article or Error
  */
 export const getByIdentification = async (
-  identification: number,
+  identification: number
 ): Promise<ArticleReturnSingle> => {
   try {
     const single = await prisma.article.findFirst({
@@ -60,11 +90,11 @@ export const getByIdentification = async (
     });
     return { article: single, error: null };
   } catch (error) {
-    log.error('Error fetching One Article by Id. Details:', error);
+    log.error("Error fetching One Article by Id. Details:", error);
     return {
       article: null,
       error:
-        'Error fetching One Article by Id. Check the logs for more details',
+        "Error fetching One Article by Id. Check the logs for more details",
     };
   }
 };
@@ -80,10 +110,10 @@ export const getAll = async (): Promise<ArticleReturnList> => {
     const allArticles = await prisma.article.findMany({});
     return { articles: allArticles, error: null };
   } catch (error) {
-    log.error('Error fetching all Articles. Details:', error);
+    log.error("Error fetching all Articles. Details:", error);
     return {
       articles: null,
-      error: 'Error fetching all Articles. Check the logs for more details',
+      error: "Error fetching all Articles. Check the logs for more details",
     };
   }
 };
