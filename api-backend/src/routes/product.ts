@@ -1,6 +1,6 @@
 import express from "express";
 import { log } from "../logger";
-import { getAll } from "../services/article";
+import { getAll } from "../services/product";
 import { serializeNonDefaultTypes } from "./utils";
 
 export default {
@@ -14,19 +14,19 @@ export default {
     app.get(`/${prefix}/health`, async (_, res) => res.status(204).send());
 
     /**
-     * Retrieve all the articles
+     * Retrieve all the products
      */
     app.get(`/${prefix}`, async (_, res) => {
       try {
-        const allArticles = await getAll();
-        const articlesParsed = serializeNonDefaultTypes(allArticles.articles);
-        res.json(articlesParsed);
+        const allProducts = await getAll();
+        const productsParsed = serializeNonDefaultTypes(allProducts.products);
+        res.json(productsParsed);
       } catch (error) {
         log.error(
-          "Error invoking `getAll` from `allArticles`. Details:",
+          "Error invoking `getAll` from `allProducts`. Details:",
           error
         );
-        res.status(500).send("There was an error fetching the Articles");
+        res.status(500).send("There was an error fetching the Products");
       }
     });
   },
