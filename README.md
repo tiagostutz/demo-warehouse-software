@@ -77,7 +77,7 @@ Check the metrics at [https://localhost:4002](https://localhost:4002) with the f
   - API Backend
 - Grafana
 
-### Prisma as an ORM
+### Prisma as an ORM (and why not GraphQL?)
 
 What happens when running:
 
@@ -96,8 +96,8 @@ Whenever you make changes to your Prisma schema in the future, you manually need
 DATABASE_URL=postgres://postgres:123456@localhost:5432/demo-warehouse npx prisma migrate dev --name init
 ```
 
-- GraphQL
-- Migration tool demo:
+- **GraphQL**: definitely would be a good option, but there are some scenarios we need specific business logic that would need some code working. But for data fecthing and mutation to database, good one. The endpoints that need additional logic could expose those endpoints as regular APIs and use the GraphQL to fetch and mutate data.
+- **Migration tool demo**:
   - started with ON DELETE CASCADE for all FKs
   - then ON DELETE RESTRICT for all FKs
   - then ON DELETE RESTRICT for Article ON DELETE CASCADE for Product

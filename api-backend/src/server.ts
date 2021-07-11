@@ -4,6 +4,8 @@ import articleRoutes from "./routes/article";
 import productRoutes from "./routes/product";
 
 const app = express();
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 const port = 4000;
 
 // Configure the API routes related to the Article domain

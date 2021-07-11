@@ -1,6 +1,6 @@
 import express from "express";
 import { log } from "../logger";
-import { get, getAll } from "../services/product";
+import { get, getAll, upsert } from "../services/product";
 import { serializeNonDefaultTypes } from "./utils";
 
 export default {
@@ -23,7 +23,7 @@ export default {
         res.json(productsParsed);
       } catch (error) {
         log.error(
-          "Error invoking `getAll` from `allProducts`. Details:",
+          "Error invoking `getAll` from `product service`. Details:",
           error
         );
         res.status(500).send("There was an error fetching the Products");
@@ -42,10 +42,43 @@ export default {
         res.json(productParsed);
       } catch (error) {
         log.error(
-          "Error invoking `get` from `retrievedProduct`. Details:",
+          "Error invoking `get` from `product service`. Details:",
           error
         );
         res.status(500).send("There was an error fetching the Product");
+      }
+    });
+
+    /**
+     * Create an product
+     */
+    app.post(`/${prefix}`, async (req, res) => {
+      try {
+        log.silly(req.body);
+        if (req.body.id) {
+          return res.status(400).json({
+            message:
+              "Not allowed to specify Product ID when creating a new one",
+          });
+        }
+
+        // extract the basic data from the Product
+        // to pass to the service invocation
+        const basicData = {
+          id: 0,
+          name: req.body.name,
+          price: req.body.price,
+        };
+        const articles = req.body.articles ? req.body.articles : [];
+        const createdProduct = await upsert(basicData, articles);
+        const productParsed = serializeNonDefaultTypes(createdProduct);
+        res.json(productParsed);
+      } catch (error) {
+        log.error(
+          "Error invoking `upsert` from `product service`. Details:",
+          error
+        );
+        res.status(500).send("There was an error creating a Product");
       }
     });
   },

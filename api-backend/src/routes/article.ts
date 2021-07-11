@@ -1,6 +1,6 @@
 import express from "express";
 import { log } from "../logger";
-import { get, getAll } from "../services/article";
+import { get, getAll, upsert } from "../services/article";
 import { serializeNonDefaultTypes } from "./utils";
 
 export default {
@@ -23,7 +23,7 @@ export default {
         res.json(articlesParsed);
       } catch (error) {
         log.error(
-          "Error invoking `getAll` from `allArticles`. Details:",
+          "Error invoking `getAll` from `article service`. Details:",
           error
         );
         res.status(500).send("There was an error fetching the Articles");
@@ -42,10 +42,39 @@ export default {
         res.json(articleParsed);
       } catch (error) {
         log.error(
-          "Error invoking `get` from `retrievedArticle`. Details:",
+          "Error invoking `get` from `article service`. Details:",
           error
         );
         res.status(500).send("There was an error fetching the Product");
+      }
+    });
+
+    /**
+     * Create an article
+     */
+    app.post(`/${prefix}`, async (req, res) => {
+      try {
+        if (req.body.id) {
+          return res.status(400).json({
+            message:
+              "Not allowed to specify Article ID when creating a new one",
+          });
+        }
+        const newArticle = {
+          name: req.body.name,
+          availableStock: req.body.availableStock,
+          identification: req.body.identification,
+          id: 0,
+        };
+        const createdArticle = await upsert(newArticle);
+        const articleParsed = serializeNonDefaultTypes(createdArticle);
+        res.json(articleParsed);
+      } catch (error) {
+        log.error(
+          "Error invoking `upsert` from `article service`. Details:",
+          error
+        );
+        res.status(500).send("There was an error fetching the Articles");
       }
     });
   },
