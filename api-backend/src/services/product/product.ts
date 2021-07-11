@@ -1,7 +1,9 @@
 import { Product } from "@prisma/client";
 import { log } from "../../logger";
 import { prisma } from "../prisma-client";
-import { ArticlesAssignment, ProductComplete } from "./model";
+import { ArticlesAssignment, ProductAvailable, ProductComplete } from "./model";
+import { get as getArticle } from "../article";
+import { serializeNonDefaultTypes } from "../../routes/utils";
 
 // Typed Return: convention on how to return
 // Use error as part of the return instead of using exceptions (like async/await forces).
@@ -130,22 +132,70 @@ export const getAll = async (): Promise<ProductReturnList<Product>> => {
 };
 
 /**
- * Fetches a list of Products
+ * Fetches a list of Products with Articles used
  * TODO: Pagination/Limit
- *
  * @returns a list with all Products
  */
-// export const getAllWithAvailability = async (): Promise<
-//   ProductReturnList<ProductComplete>
-// > => {
-//   try {
-//     const allProducts = await prisma.product.findMany({});
-//     return { products: allProducts, error: null };
-//   } catch (error) {
-//     log.error("Error fetching all Products. Details:", error);
-//     return {
-//       products: null,
-//       error: "Error fetching all Products. Check the logs for more details",
-//     };
-//   }
-// };
+export const getAllWithAvailability = async (): Promise<
+  ProductReturnList<ProductAvailable>
+> => {
+  try {
+    // Check how the code above just looks like a GraphQL resolver!
+    // If we have GraphQL, we could fire a request here and have
+    // the data we need for this logic. Nice TODO: GraphQL.
+
+    // 1) Retrieve all the products that will be returned
+    const allProducts = await prisma.product.findMany({});
+
+    // 2) For every Product, fetch the Product composition, that is the Articles and respective quantities from ArticleOnProduct relation
+    // and enrich it with the Article details
+    const productsWithArticles = await Promise.all(
+      // 2.1) For each Product, retrieve the relations with Article
+      allProducts.map(async (product) => {
+        // 2.1.1) fetch the relationships for the current product
+        const articlesOnProductsRetrieved =
+          await prisma.articlesOnProducts.findMany({
+            where: {
+              productId: product.id,
+            },
+          });
+
+        // 2.1.2) For each relation retrieved, fetch the Article details to build the enriched relationship data
+        const articlesOnProductsWithArticleDetails = await Promise.all(
+          articlesOnProductsRetrieved.map(async (aopr) => {
+            // we totally need a cache here to improve this resolution
+            // TODO: cache
+
+            // 2.1.2.1) Fetch the Article details
+            const articleGetResult = await getArticle(aopr.articleId);
+            if (articleGetResult.error) {
+              // if there's an error retrieving details, put this information
+              return { ...aopr, article: { name: "<failed to fetch>" } };
+            }
+
+            // merge/enrich the ArticleOnProduct objetct with the Article details + quantity field of the relationship
+            return {
+              article: articleGetResult.article,
+              quantity: aopr.quantity,
+            };
+          })
+        );
+
+        // 2.1.3) return the enriched relationship ArticleOnProduct
+        return {
+          ...product,
+          articles: articlesOnProductsWithArticleDetails,
+          quantityAvailable: 0,
+        };
+      })
+    );
+
+    return { products: productsWithArticles, error: null };
+  } catch (error) {
+    log.error("Error fetching all Products. Details:", error);
+    return {
+      products: null,
+      error: "Error fetching all Products. Check the logs for more details",
+    };
+  }
+};

@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "../prisma-client";
 import { upsert as upserProduct, get as getProduct } from ".";
 import { upsert as upserArticle, get as getArticle } from "../article";
-import { getAll } from "./product";
+import { getAll, getAllWithAvailability } from "./product";
 
 const priceDecimal = new Prisma.Decimal(14.5);
 
@@ -11,12 +11,14 @@ describe("Create Article, Product and evaluate stock", () => {
   beforeEach(async () => {
     // clean
     await prisma.product.deleteMany({});
+    await prisma.article.deleteMany({});
   });
 
   // After all tests, clean the database for any test data inserted
   afterAll(async () => {
     // clean
     await prisma.product.deleteMany({});
+    await prisma.article.deleteMany({});
   });
 
   test("Evaluate NONE Product available based on Inventory (Article stock)", async () => {
@@ -64,7 +66,7 @@ describe("Create Article, Product and evaluate stock", () => {
       articleList
     );
     // check whether the inserted relationship is correct
-    const resultGet = await getProduct(result.product?.id!);
+    const resultGet = await getAllWithAvailability();
 
     //
   });
