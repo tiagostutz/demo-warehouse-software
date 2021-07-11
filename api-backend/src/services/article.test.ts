@@ -44,7 +44,16 @@ describe("Testing CRUD Operations", () => {
     });
     expect(result.article).not.toBeNull();
     expect(result.error).toBeNull();
-
     expect(result.article?.identification).toBe(10001);
+
+    const resultDupl = await create({
+      name: "Test",
+      availableStock: 0,
+      identification: 10001,
+      id: 0,
+    });
+
+    expect(resultDupl.article).toBeNull();
+    expect(resultDupl.error).not.toBeNull();
   });
 });
