@@ -1,7 +1,6 @@
-import { Article, PrismaClient } from "@prisma/client";
-import { log } from "../logger";
-
-const prisma = new PrismaClient();
+import { Article } from "@prisma/client";
+import { log } from "../../logger";
+import { prisma } from "../prisma-client";
 
 // Typed Return: convention on how to return
 // Use error as part of the return instead of using exceptions (like async/await forces).
@@ -25,15 +24,17 @@ export type ArticleReturnList = {
  * @param article article to be created
  * @returns the created Article
  */
-export const create = async (
+export const upsert = async (
   article: Article
 ): Promise<ArticleReturnSingle> => {
   try {
     // get only the necessary attributes to write do Database
     // for instance, the `id` is not passed because the column is autoincrement (serial)
     const { identification, name, availableStock } = article;
-    const articleCreated = await prisma.article.create({
-      data: { identification, name, availableStock },
+    const articleCreated = await prisma.article.upsert({
+      where: { id: article.id },
+      create: { identification, name, availableStock },
+      update: { identification, name, availableStock },
     });
     return {
       article: articleCreated,
