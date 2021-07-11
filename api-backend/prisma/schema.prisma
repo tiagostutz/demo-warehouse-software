@@ -1,0 +1,34 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialActions"]
+}
+
+model Article {
+  id             Int                  @id @default(autoincrement())
+  identification Int
+  name           String
+  availableStock Int                  @default(0)
+  products       ArticlesOnProducts[]
+}
+
+model Product {
+  id       Int                  @id @default(autoincrement())
+  name     String
+  price    Decimal
+  articles ArticlesOnProducts[]
+}
+
+model ArticlesOnProducts {
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int // relation scalar field (used in the `@relation` attribute above)
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Restrict)
+  articleId Int // relation scalar field (used in the `@relation` attribute above)
+  quantity  Int // quantity of `article` used to make the `product`
+
+  @@id([productId, articleId])
+}
