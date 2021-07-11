@@ -1,4 +1,4 @@
-import { upsert, get } from "./article";
+import { upsert, get } from ".";
 import { prisma } from "../prisma-client";
 
 const identificationMockBigInt = BigInt(20211010090012331);

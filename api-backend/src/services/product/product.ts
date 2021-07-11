@@ -1,13 +1,14 @@
 import { Product } from "@prisma/client";
 import { log } from "../../logger";
 import { prisma } from "../prisma-client";
+import { ArticlesAssignment, ProductComplete } from "./model";
 
 // Typed Return: convention on how to return
 // Use error as part of the return instead of using exceptions (like async/await forces).
 // This way we have a more "procedural" flow, like would do in a Golang idiomatic way
 
 export type ProductReturnSingle = {
-  product: Product | null;
+  product: ProductComplete | null;
   error: string | null;
 };
 
@@ -25,19 +26,36 @@ export type ProductReturnList = {
  * @returns the created Product
  */
 export const upsert = async (
-  product: Product
+  product: Product,
+  articles: Array<ArticlesAssignment>
 ): Promise<ProductReturnSingle> => {
   try {
     // get only the necessary attributes to write do Database
     // for instance, the `id` is not passed because the column is autoincrement (serial)
     const { name, price } = product;
-    const ProductCreated = await prisma.product.upsert({
+
+    const articlesOnProductsCreate = articles.map((article) => ({
+      quantity: article.quantity,
+      articleId: article.articleId,
+    }));
+
+    const productCreated = await prisma.product.upsert({
       where: { id: product.id },
-      create: { name, price },
+      create: {
+        name,
+        price,
+        articles: {
+          createMany: {
+            data: articlesOnProductsCreate,
+            skipDuplicates: true,
+          },
+        },
+      },
       update: { name, price },
     });
+    const productComplete = Object.assign(productCreated, { articles: [] });
     return {
-      product: ProductCreated,
+      product: productComplete,
       error: null,
     };
   } catch (error) {
@@ -58,12 +76,28 @@ export const upsert = async (
  */
 export const get = async (id: number): Promise<ProductReturnSingle> => {
   try {
-    const single = await prisma.product.findUnique({
+    const retrievedProduct = await prisma.product.findUnique({
       where: {
         id,
       },
     });
-    return { product: single, error: null };
+
+    // if doesnt find the product, don't waste timing searching for articlesOnProducts
+    if (!retrievedProduct) {
+      return { product: null, error: null };
+    }
+
+    const articlesOnProducts = await prisma.articlesOnProducts.findMany({
+      where: {
+        productId: retrievedProduct?.id,
+      },
+    });
+
+    // compose the returning object with Products data + articles used to make it
+    const fullProduct = Object.assign(retrievedProduct, {
+      articles: articlesOnProducts,
+    });
+    return { product: fullProduct, error: null };
   } catch (error) {
     log.error("Error fetching One Product by Id. Details:", error);
     return {
