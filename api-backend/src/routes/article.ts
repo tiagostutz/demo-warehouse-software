@@ -11,6 +11,9 @@ export const addRoutes = (app: express.Application) => {
    */
   app.get("/health", async (_, res) => res.status(204).send());
 
+  /**
+   * Retrieve all the articles
+   */
   app.get("/", async (_, res) => {
     try {
       const allArticles = await getAll();
