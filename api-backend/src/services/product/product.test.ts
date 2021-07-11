@@ -125,7 +125,6 @@ describe("Testing Product relationship with Article", () => {
     expect(resultArticle3.error).toBeNull();
 
     // Create a Product with Article 1, Article 2 and Article 3.
-    // leaving the Article 2 off
     const articleList = [
       {
         articleId: resultArticle1.article?.id!,
@@ -200,7 +199,6 @@ describe("Testing Product relationship with Article", () => {
     expect(resultArticle3.error).toBeNull();
 
     // Create a Product with Article 1, Article 2 and Article 3.
-    // leaving the Article 2 off
     const articleList = [
       {
         articleId: resultArticle1.article?.id!,
@@ -286,7 +284,6 @@ describe("Testing Product relationship with Article", () => {
     expect(resultArticle3.error).toBeNull();
 
     // Create a Product with Article 1, Article 2 and Article 3.
-    // leaving the Article 2 off
     const articleList = [
       {
         articleId: resultArticle1.article?.id!,

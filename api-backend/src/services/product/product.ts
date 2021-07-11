@@ -7,13 +7,13 @@ import { ArticlesAssignment, ProductComplete } from "./model";
 // Use error as part of the return instead of using exceptions (like async/await forces).
 // This way we have a more "procedural" flow, like would do in a Golang idiomatic way
 
-export type ProductReturnSingle = {
-  product: ProductComplete | null;
+export type ProductReturn<T extends Product> = {
+  product: T | null;
   error: string | null;
 };
 
-export type ProductReturnList = {
-  products: Array<Product> | null;
+export type ProductReturnList<T extends Product> = {
+  products: Array<T> | null;
   error: string | null;
 };
 
@@ -28,7 +28,7 @@ export type ProductReturnList = {
 export const upsert = async (
   product: Product,
   articles: Array<ArticlesAssignment>
-): Promise<ProductReturnSingle> => {
+): Promise<ProductReturn<Product>> => {
   try {
     // get only the necessary attributes to write do Database
     // for instance, the `id` is not passed because the column is autoincrement (serial)
@@ -74,7 +74,9 @@ export const upsert = async (
  * @param id primary key value of the fetching Product
  * @returns Product or Error
  */
-export const get = async (id: number): Promise<ProductReturnSingle> => {
+export const get = async (
+  id: number
+): Promise<ProductReturn<ProductComplete>> => {
   try {
     const retrievedProduct = await prisma.product.findUnique({
       where: {
@@ -114,7 +116,7 @@ export const get = async (id: number): Promise<ProductReturnSingle> => {
  *
  * @returns a list with all Products
  */
-export const getAll = async (): Promise<ProductReturnList> => {
+export const getAll = async (): Promise<ProductReturnList<Product>> => {
   try {
     const allProducts = await prisma.product.findMany({});
     return { products: allProducts, error: null };
@@ -126,3 +128,24 @@ export const getAll = async (): Promise<ProductReturnList> => {
     };
   }
 };
+
+/**
+ * Fetches a list of Products
+ * TODO: Pagination/Limit
+ *
+ * @returns a list with all Products
+ */
+// export const getAllWithAvailability = async (): Promise<
+//   ProductReturnList<ProductComplete>
+// > => {
+//   try {
+//     const allProducts = await prisma.product.findMany({});
+//     return { products: allProducts, error: null };
+//   } catch (error) {
+//     log.error("Error fetching all Products. Details:", error);
+//     return {
+//       products: null,
+//       error: "Error fetching all Products. Check the logs for more details",
+//     };
+//   }
+// };
