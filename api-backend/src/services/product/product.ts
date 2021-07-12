@@ -170,7 +170,14 @@ export const getAllWithAvailability = async (): Promise<
             const articleGetResult = await getArticle(aopr.articleId);
             if (articleGetResult.error) {
               // if there's an error retrieving details, put this information
-              return { ...aopr, article: { name: "<failed to fetch>" } };
+              return {
+                ...aopr,
+                article: {
+                  name: "<failed to fetch>",
+                  identification: 0,
+                  availableStock: -1,
+                },
+              };
             }
 
             // merge/enrich the ArticleOnProduct objetct with the Article details + quantity field of the relationship
@@ -181,11 +188,25 @@ export const getAllWithAvailability = async (): Promise<
           })
         );
 
-        // 2.1.3) return the enriched relationship ArticleOnProduct
+        // 2.1.3) **Evaluate the product quantity available**
+        //  find the min stock/quantity ratio among all the Articles needed to know what's the minimum quantity
+        //  of Products can be done, because that will the available Product count
+        const articlesQuantityProducts =
+          articlesOnProductsWithArticleDetails.map((apdetail) =>
+            Math.floor(apdetail.article?.availableStock! / apdetail.quantity)
+          );
+        // among the array of how many Products can be made by each Article, get the min
+        // because that will be the available Product count
+        const quantityAvailable = Math.min.apply(
+          null,
+          articlesQuantityProducts
+        );
+
+        // 2.1.4) return the enriched relationship ArticleOnProduct
         return {
           ...product,
           articles: articlesOnProductsWithArticleDetails,
-          quantityAvailable: 0,
+          quantityAvailable,
         };
       })
     );
