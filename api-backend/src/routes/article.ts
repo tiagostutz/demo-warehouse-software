@@ -23,7 +23,10 @@ export default {
      */
     app.get(`/${prefix}`, async (_, res) => {
       try {
+        // Invoke the service to get all the articles
         const allArticles = await getAll();
+
+        // serialize the result with special serializer because of some non-standard types, like `bigint`
         const articlesParsed = serializeNonDefaultTypes(allArticles.articles);
         res.json(articlesParsed);
       } catch (error) {
@@ -40,7 +43,10 @@ export default {
      */
     app.get(`/${prefix}/:id`, async (req, res) => {
       try {
+        // Invoke the service to get an article by the provided ID
         const retrievedArticle = await get(parseInt(req.params.id, 10));
+
+        // serialize the result with special serializer because of some non-standard types, like `bigint`
         const articleParsed = serializeNonDefaultTypes(
           retrievedArticle.article
         );
@@ -64,13 +70,18 @@ export default {
             message: 'Not allowed to specify Article ID when creating a new one'
           });
         }
+        // prepare the data to be inserted
         const newArticle = {
           name: req.body.name,
           availableStock: req.body.availableStock,
           identification: req.body.identification,
           id: 0
         };
+
+        // invoke the service that will write the received data to the database
         const createdArticle = await upsert(newArticle);
+
+        // serialize the result with special serializer because of some non-standard types, like `bigint`
         const articleParsed = serializeNonDefaultTypes(createdArticle);
         return res.json(articleParsed);
       } catch (error) {
@@ -87,9 +98,12 @@ export default {
      */
     app.post(`/${prefix}/product/:id/stock-update`, async (req, res) => {
       try {
+        // handle the `quantity` query param to guarantee we have a valid value
         const quantity = req.query.quantity
           ? parseInt(`${req.query.quantity}`, 10)
           : 1;
+
+        // invoke the update Stock service
         const updatedStock = await updateStockByProductMade(
           parseInt(req.params.id, 10),
           quantity

@@ -4,6 +4,10 @@ A simple demo of a warehouse software with TypeScript, PostgreSQL, Prisma, Kong,
 
 ## Getting started
 
+There are two main components: API Backend and Database auto-updater.
+
+### API Backend
+
 To start, clone this repo:
 
 ```bash
@@ -60,7 +64,21 @@ Check the logs and fetch again the products
 curl -X GET "https://localhost:4001/products"
 ```
 
-### Check some metrics
+## Evolution Stages
+
+**Stage 1** (current implementation): no security, no load handling, no caching
+![stage 1 overview](system-design-stage-1.jpg)
+
+**Stage 2**: security, load balancing one level (API Gateway), no caching
+![stage 2 overview](system-design-stage-2.jpg)
+
+**Stage 3** (start production): security, load balancing one level (API Gateway), observability, caching
+![stage 3 overview](system-design-stage-3.jpg)
+
+**Stage 4**: security, load handling, caching, observability, database replica/shard, job scheduling with queues and workflow management
+![stage 4 overview](system-design-stage-4.jpg)
+
+## Check some metrics
 
 Check the metrics at [https://localhost:4002](https://localhost:4002) with the following credentials:
 
@@ -85,6 +103,8 @@ yarn run test
 
 - Pros and cons
 - Other possibilities
+- Kong API Gateway
+- Sidecar/Ambassador to hide from the Business Logic this complexity
 
 ### Observability
 

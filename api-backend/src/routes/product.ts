@@ -18,7 +18,10 @@ export default {
      */
     app.get(`/${prefix}`, async (_, res) => {
       try {
+        // Invoke the service to get all the products on the base
         const allProducts = await getAll();
+
+        // serialize the result with special serializer because of some non-standard types, like `bigint`
         const productsParsed = serializeNonDefaultTypes(allProducts.products);
         res.json(productsParsed);
       } catch (error) {
@@ -35,9 +38,12 @@ export default {
      */
     app.get(`/${prefix}/:id`, async (req, res) => {
       try {
+        // Invoke the service to get an product by the provided ID
         const retrievedProduct = await getAllWithAvailability(
           parseInt(req.params.id, 10)
         );
+
+        // serialize the result with special serializer because of some non-standard types, like `bigint`
         const productParsed = serializeNonDefaultTypes(
           retrievedProduct.products
         );
@@ -74,7 +80,11 @@ export default {
           price: req.body.price
         };
         const articles = req.body.articles ? req.body.articles : [];
+
+        // invoke the service that will write the received data to the database
         const createdProduct = await upsert(basicData, articles);
+
+        // serialize the result with special serializer because of some non-standard types, like `bigint`
         const productParsed = serializeNonDefaultTypes(createdProduct);
         return res.json(productParsed);
       } catch (error) {
