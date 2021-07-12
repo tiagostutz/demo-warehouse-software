@@ -1,7 +1,7 @@
-import express from "express";
-import { log } from "../logger";
-import { get, getAll, upsert } from "../services/article";
-import { serializeNonDefaultTypes } from "./utils";
+import express from 'express';
+import { log } from '../logger';
+import { get, getAll, upsert } from '../services/article';
+import { serializeNonDefaultTypes } from './utils';
 
 export default {
   configureRoutes: (prefix: string, app: express.Application) => {
@@ -22,11 +22,8 @@ export default {
         const articlesParsed = serializeNonDefaultTypes(allArticles.articles);
         res.json(articlesParsed);
       } catch (error) {
-        log.error(
-          "Error invoking `getAll` from `article service`. Details:",
-          error
-        );
-        res.status(500).send("There was an error fetching the Articles");
+        log.error('Error invoking `getAll` from `article service`. Details:', error);
+        res.status(500).send('There was an error fetching the Articles');
       }
     });
 
@@ -35,17 +32,12 @@ export default {
      */
     app.get(`/${prefix}/:id`, async (req, res) => {
       try {
-        const retrievedArticle = await get(parseInt(req.params.id));
-        const articleParsed = serializeNonDefaultTypes(
-          retrievedArticle.article
-        );
+        const retrievedArticle = await get(parseInt(req.params.id, 10));
+        const articleParsed = serializeNonDefaultTypes(retrievedArticle.article);
         res.json(articleParsed);
       } catch (error) {
-        log.error(
-          "Error invoking `get` from `article service`. Details:",
-          error
-        );
-        res.status(500).send("There was an error fetching the Product");
+        log.error('Error invoking `get` from `article service`. Details:', error);
+        res.status(500).send('There was an error fetching the Product');
       }
     });
 
@@ -56,8 +48,7 @@ export default {
       try {
         if (req.body.id) {
           return res.status(400).json({
-            message:
-              "Not allowed to specify Article ID when creating a new one",
+            message: 'Not allowed to specify Article ID when creating a new one',
           });
         }
         const newArticle = {
@@ -68,13 +59,10 @@ export default {
         };
         const createdArticle = await upsert(newArticle);
         const articleParsed = serializeNonDefaultTypes(createdArticle);
-        res.json(articleParsed);
+        return res.json(articleParsed);
       } catch (error) {
-        log.error(
-          "Error invoking `upsert` from `article service`. Details:",
-          error
-        );
-        res.status(500).send("There was an error fetching the Articles");
+        log.error('Error invoking `upsert` from `article service`. Details:', error);
+        return res.status(500).send('There was an error fetching the Articles');
       }
     });
   },

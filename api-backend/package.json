@@ -23,7 +23,7 @@
   "scripts": {
     "dev": "DATABASE_URL=postgres://postgres:123456@localhost:5432/demo-warehouse ts-node src/server.ts",
     "lint": "yarn eslint . --ext .js,.ts --fix",
-    "test": "DATABASE_URL=postgres://postgres:123456@localhost:5432/demo-warehouse npx jest --forceExit  --watch --detectOpenHandles",
+    "test": "DATABASE_URL=postgres://postgres:123456@localhost:5432/demo-warehouse npx jest --forceExit --watch --detectOpenHandles",
     "migrate": "DATABASE_URL=postgres://postgres:123456@localhost:5432/demo-warehouse npx prisma migrate dev --name init",
     "prisma": "npx prisma generate"
   },

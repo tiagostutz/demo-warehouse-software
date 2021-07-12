@@ -1,4 +1,4 @@
-import { Article, ArticlesOnProducts, Product } from "@prisma/client";
+import { ArticlesOnProducts, Product } from '@prisma/client';
 
 /**
  * Specify quantity of articles used to made a product

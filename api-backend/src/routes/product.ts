@@ -1,7 +1,7 @@
-import express from "express";
-import { log } from "../logger";
-import { get, getAll, upsert } from "../services/product";
-import { serializeNonDefaultTypes } from "./utils";
+import express from 'express';
+import { log } from '../logger';
+import { get, getAll, upsert } from '../services/product';
+import { serializeNonDefaultTypes } from './utils';
 
 export default {
   configureRoutes: (prefix: string, app: express.Application) => {
@@ -22,11 +22,8 @@ export default {
         const productsParsed = serializeNonDefaultTypes(allProducts.products);
         res.json(productsParsed);
       } catch (error) {
-        log.error(
-          "Error invoking `getAll` from `product service`. Details:",
-          error
-        );
-        res.status(500).send("There was an error fetching the Products");
+        log.error('Error invoking `getAll` from `product service`. Details:', error);
+        res.status(500).send('There was an error fetching the Products');
       }
     });
 
@@ -35,17 +32,12 @@ export default {
      */
     app.get(`/${prefix}/:id`, async (req, res) => {
       try {
-        const retrievedProduct = await get(parseInt(req.params.id));
-        const productParsed = serializeNonDefaultTypes(
-          retrievedProduct.product
-        );
+        const retrievedProduct = await get(parseInt(req.params.id, 10));
+        const productParsed = serializeNonDefaultTypes(retrievedProduct.product);
         res.json(productParsed);
       } catch (error) {
-        log.error(
-          "Error invoking `get` from `product service`. Details:",
-          error
-        );
-        res.status(500).send("There was an error fetching the Product");
+        log.error('Error invoking `get` from `product service`. Details:', error);
+        res.status(500).send('There was an error fetching the Product');
       }
     });
 
@@ -57,8 +49,7 @@ export default {
         log.silly(req.body);
         if (req.body.id) {
           return res.status(400).json({
-            message:
-              "Not allowed to specify Product ID when creating a new one",
+            message: 'Not allowed to specify Product ID when creating a new one',
           });
         }
 
@@ -72,13 +63,10 @@ export default {
         const articles = req.body.articles ? req.body.articles : [];
         const createdProduct = await upsert(basicData, articles);
         const productParsed = serializeNonDefaultTypes(createdProduct);
-        res.json(productParsed);
+        return res.json(productParsed);
       } catch (error) {
-        log.error(
-          "Error invoking `upsert` from `product service`. Details:",
-          error
-        );
-        res.status(500).send("There was an error creating a Product");
+        log.error('Error invoking `upsert` from `product service`. Details:', error);
+        return res.status(500).send('There was an error creating a Product');
       }
     });
   },

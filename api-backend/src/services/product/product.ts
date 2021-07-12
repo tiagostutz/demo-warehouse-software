@@ -1,9 +1,12 @@
-import { Product } from "@prisma/client";
-import { log } from "../../logger";
-import { prisma } from "../prisma-client";
-import { ArticlesAssignment, ProductAvailable, ProductComplete } from "./model";
-import { get as getArticle } from "../article";
-import { serializeNonDefaultTypes } from "../../routes/utils";
+import { Product } from '@prisma/client';
+import { log } from '../../logger';
+import { prisma } from '../prisma-client';
+import {
+  ArticlesAssignment,
+  ProductAvailable,
+  ProductComplete
+} from '../model';
+import { get as getArticle } from '../article';
 
 // Typed Return: convention on how to return
 // Use error as part of the return instead of using exceptions (like async/await forces).
@@ -38,7 +41,7 @@ export const upsert = async (
 
     const articlesOnProductsCreate = articles.map((article) => ({
       quantity: article.quantity,
-      articleId: article.articleId,
+      articleId: article.articleId
     }));
 
     const productCreated = await prisma.product.upsert({
@@ -49,23 +52,23 @@ export const upsert = async (
         articles: {
           createMany: {
             data: articlesOnProductsCreate,
-            skipDuplicates: true,
-          },
-        },
+            skipDuplicates: true
+          }
+        }
       },
-      update: { name, price },
+      update: { name, price }
     });
     const productComplete = Object.assign(productCreated, { articles: [] });
     return {
       product: productComplete,
-      error: null,
+      error: null
     };
   } catch (error) {
-    log.error("Error creating a Product. Details:", error);
+    log.error('Error creating a Product. Details:', error);
     return {
       product: null,
       error:
-        "Error inserting a Product to the database. Check the logs for more details",
+        'Error inserting a Product to the database. Check the logs for more details'
     };
   }
 };
@@ -82,8 +85,8 @@ export const get = async (
   try {
     const retrievedProduct = await prisma.product.findUnique({
       where: {
-        id,
-      },
+        id
+      }
     });
 
     // if doesnt find the product, don't waste timing searching for articlesOnProducts
@@ -93,21 +96,20 @@ export const get = async (
 
     const articlesOnProducts = await prisma.articlesOnProducts.findMany({
       where: {
-        productId: retrievedProduct?.id,
-      },
+        productId: retrievedProduct?.id
+      }
     });
 
     // compose the returning object with Products data + articles used to make it
     const fullProduct = Object.assign(retrievedProduct, {
-      articles: articlesOnProducts,
+      articles: articlesOnProducts
     });
     return { product: fullProduct, error: null };
   } catch (error) {
-    log.error("Error fetching One Product by Id. Details:", error);
+    log.error('Error fetching One Product by Id. Details:', error);
     return {
       product: null,
-      error:
-        "Error fetching One Product by Id. Check the logs for more details",
+      error: 'Error fetching One Product by Id. Check the logs for more details'
     };
   }
 };
@@ -123,10 +125,10 @@ export const getAll = async (): Promise<ProductReturnList<Product>> => {
     const allProducts = await prisma.product.findMany({});
     return { products: allProducts, error: null };
   } catch (error) {
-    log.error("Error fetching all Products. Details:", error);
+    log.error('Error fetching all Products. Details:', error);
     return {
       products: null,
-      error: "Error fetching all Products. Check the logs for more details",
+      error: 'Error fetching all Products. Check the logs for more details'
     };
   }
 };
@@ -147,7 +149,8 @@ export const getAllWithAvailability = async (): Promise<
     // 1) Retrieve all the products that will be returned
     const allProducts = await prisma.product.findMany({});
 
-    // 2) For every Product, fetch the Product composition, that is the Articles and respective quantities from ArticleOnProduct relation
+    // 2) For every Product, fetch the Product composition, that is the Articles and respective
+    // quantities from ArticleOnProduct relation
     // and enrich it with the Article details
     const productsWithArticles = await Promise.all(
       // 2.1) For each Product, retrieve the relations with Article
@@ -156,11 +159,12 @@ export const getAllWithAvailability = async (): Promise<
         const articlesOnProductsRetrieved =
           await prisma.articlesOnProducts.findMany({
             where: {
-              productId: product.id,
-            },
+              productId: product.id
+            }
           });
 
-        // 2.1.2) For each relation retrieved, fetch the Article details to build the enriched relationship data
+        // 2.1.2) For each relation retrieved, fetch the Article details to build
+        // the enriched relationship data
         const articlesOnProductsWithArticleDetails = await Promise.all(
           articlesOnProductsRetrieved.map(async (aopr) => {
             // we totally need a cache here to improve this resolution
@@ -173,23 +177,25 @@ export const getAllWithAvailability = async (): Promise<
               return {
                 ...aopr,
                 article: {
-                  name: "<failed to fetch>",
+                  name: '<failed to fetch>',
                   identification: 0,
-                  availableStock: -1,
-                },
+                  availableStock: -1
+                }
               };
             }
 
-            // merge/enrich the ArticleOnProduct objetct with the Article details + quantity field of the relationship
+            // merge/enrich the ArticleOnProduct objetct with the Article details + quantity field
+            // of the relationship
             return {
               article: articleGetResult.article,
-              quantity: aopr.quantity,
+              quantity: aopr.quantity
             };
           })
         );
 
         // 2.1.3) **Evaluate the product quantity available**
-        //  find the min stock/quantity ratio among all the Articles needed to know what's the minimum quantity
+        //  find the min stock/quantity ratio among all the Articles needed to know
+        // what's the minimum quantity
         //  of Products can be done, because that will the available Product count
         const articlesQuantityProducts =
           articlesOnProductsWithArticleDetails.map((apdetail) =>
@@ -206,17 +212,17 @@ export const getAllWithAvailability = async (): Promise<
         return {
           ...product,
           articles: articlesOnProductsWithArticleDetails,
-          quantityAvailable,
+          quantityAvailable
         };
       })
     );
 
     return { products: productsWithArticles, error: null };
   } catch (error) {
-    log.error("Error fetching all Products. Details:", error);
+    log.error('Error fetching all Products. Details:', error);
     return {
       products: null,
-      error: "Error fetching all Products. Check the logs for more details",
+      error: 'Error fetching all Products. Check the logs for more details'
     };
   }
 };
