@@ -16,11 +16,22 @@ Then bring all the components up:
 docker-compose up --build
 ```
 
-Now fetch some products and some articles:
+After that, copy the [invetory.json](invetory.json) to the **invetory-files** folder and check the logs to see confirm that the Articles were correctly imported from it. Once the Articles are inserted, copy the [products.json](products.json) to the **product-files** folder and check the logs to see the Products being inserted.
+
+Now, with some data on the DB, fetch some products and some articles:
 
 ```bash
-curl -X GET "https://localhost:4001/articles"
-curl -X GET "https://localhost:4001/products"
+curl http://localhost:4000/article
+```
+
+```bash
+curl http://localhost:4000/product
+```
+
+Replace **:id** bellow by a Product ID returned in the previous `curl` to check a more complete return of Product details
+
+```bash
+curl http://localhost:4000/product/:id
 ```
 
 ### Database auto-updater
@@ -58,7 +69,15 @@ Check the metrics at [https://localhost:4002](https://localhost:4002) with the f
 
 ## Testing
 
+There are two levels of tests: component/service/unit level and integration/API level test
+
 ### API Backend
+
+The tests here are at folders names `tests` and the files has a `.test.ts` suffix. To run the tests:
+
+```bash
+yarn run test
+```
 
 ### Database Auto-updater
 
@@ -88,7 +107,7 @@ yarn install @prisma/client
 The install command automatically invokes prisma generate for you which reads your Prisma schema and generates a version of Prisma Client that is tailored to your models.
 Whenever you make changes to your Prisma schema in the future, you manually need to invoke `npx prisma generate` in order to accomodate the changes in your Prisma Client API.
 
-- More at https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/install-prisma-client-typescript-postgres/
+- More at [https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/install-prisma-client-typescript-postgres/](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/install-prisma-client-typescript-postgres/)
 
 - Used the defaults of Prisma to generate a Database, but if the data modeling would be subject to a Data Administration process with data/terms dictionary, conventions, abbreviations and that kind of stuff, some additional configuration would be needed on the [schema.prisma](api-backend/schema.prisma) definition.
 

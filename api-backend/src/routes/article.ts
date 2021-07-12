@@ -1,6 +1,11 @@
 import express from 'express';
 import { log } from '../logger';
-import { get, getAll, upsert } from '../services/article';
+import {
+  get,
+  getAll,
+  updateStockByProductMade,
+  upsert
+} from '../services/article';
 import { serializeNonDefaultTypes } from './utils';
 
 export default {
@@ -22,7 +27,10 @@ export default {
         const articlesParsed = serializeNonDefaultTypes(allArticles.articles);
         res.json(articlesParsed);
       } catch (error) {
-        log.error('Error invoking `getAll` from `article service`. Details:', error);
+        log.error(
+          'Error invoking `getAll` from `article service`. Details:',
+          error
+        );
         res.status(500).send('There was an error fetching the Articles');
       }
     });
@@ -33,10 +41,15 @@ export default {
     app.get(`/${prefix}/:id`, async (req, res) => {
       try {
         const retrievedArticle = await get(parseInt(req.params.id, 10));
-        const articleParsed = serializeNonDefaultTypes(retrievedArticle.article);
+        const articleParsed = serializeNonDefaultTypes(
+          retrievedArticle.article
+        );
         res.json(articleParsed);
       } catch (error) {
-        log.error('Error invoking `get` from `article service`. Details:', error);
+        log.error(
+          'Error invoking `get` from `article service`. Details:',
+          error
+        );
         res.status(500).send('There was an error fetching the Product');
       }
     });
@@ -48,22 +61,50 @@ export default {
       try {
         if (req.body.id) {
           return res.status(400).json({
-            message: 'Not allowed to specify Article ID when creating a new one',
+            message: 'Not allowed to specify Article ID when creating a new one'
           });
         }
         const newArticle = {
           name: req.body.name,
           availableStock: req.body.availableStock,
           identification: req.body.identification,
-          id: 0,
+          id: 0
         };
         const createdArticle = await upsert(newArticle);
         const articleParsed = serializeNonDefaultTypes(createdArticle);
         return res.json(articleParsed);
       } catch (error) {
-        log.error('Error invoking `upsert` from `article service`. Details:', error);
+        log.error(
+          'Error invoking `upsert` from `article service`. Details:',
+          error
+        );
         return res.status(500).send('There was an error fetching the Articles');
       }
     });
-  },
+
+    /**
+     * Update Article stock based on Product selling event
+     */
+    app.post(`/${prefix}/product/:id/stock-update`, async (req, res) => {
+      try {
+        const quantity = req.query.quantity
+          ? parseInt(`${req.query.quantity}`, 10)
+          : 1;
+        const updatedStock = await updateStockByProductMade(
+          parseInt(req.params.id, 10),
+          quantity
+        );
+        const articlesParsed = serializeNonDefaultTypes(updatedStock);
+        return res.json(articlesParsed);
+      } catch (error) {
+        log.error(
+          'Error invoking `updateStockByProductMade` from `article service`. Details:',
+          error
+        );
+        return res
+          .status(500)
+          .send('There was an error updating the Articles invetory stock');
+      }
+    });
+  }
 };
