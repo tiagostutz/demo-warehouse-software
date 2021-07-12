@@ -69,13 +69,13 @@ curl -X GET "https://localhost:4001/products"
 **Stage 1** (current implementation): no security, no load handling, no caching
 ![stage 1 overview](system-design-stage-1.jpg)
 
-**Stage 2**: security, load balancing one level (API Gateway), no caching
+**Stage 2** (goal of this project): security, load balancing one level (API Gateway), no caching
 ![stage 2 overview](system-design-stage-2.jpg)
 
 **Stage 3** (start production): security, load balancing one level (API Gateway), observability, caching
 ![stage 3 overview](system-design-stage-3.jpg)
 
-**Stage 4**: security, load handling, caching, observability, database replica/shard, job scheduling with queues and workflow management
+**Stage 4** (scaling to the cloud): security, load handling, caching, observability, database replica/shard, job scheduling with queues and workflow management
 ![stage 4 overview](system-design-stage-4.jpg)
 
 ## Check some metrics
