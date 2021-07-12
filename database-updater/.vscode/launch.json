@@ -12,9 +12,9 @@
       "program": ".",
       "args": [
         "--logLevel=debug",
-        "--incomingData=data/pending",
-        "--successfulProcessedFolder=data/success",
-        "--failedProcessedFolder=data/failed"
+        "--incomingDataFolder=data/incoming",
+        "--successProcessedFolder=data/success",
+        "--failProcessedFolder=data/fail"
       ]
     }
   ]

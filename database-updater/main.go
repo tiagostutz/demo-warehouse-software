@@ -4,13 +4,14 @@ import (
 	"database-autoupdater/handlers"
 	"database-autoupdater/watchers"
 	"flag"
+	"fmt"
 
 	"github.com/sirupsen/logrus"
 )
 
 var incomingDataFolder string
-var successfulProcessedFolder string
-var failedProcessedFolder string
+var successProcessedFolder string
+var failProcessedFolder string
 
 func init() {
 
@@ -20,8 +21,8 @@ func init() {
 	logLevel := "info"
 	flag.StringVar(&logLevel, "logLevel", "info", "Log level")
 	flag.StringVar(&incomingDataFolder, "incomingDataFolder", "", "Folder where the products.json and inventory.json will be placed to get the read the data from")
-	flag.StringVar(&successfulProcessedFolder, "successfulProcessedFolder", "", "Folder where the products.json and inventory.json that were successfully processed will be moved to")
-	flag.StringVar(&failedProcessedFolder, "failedProcessedFolder", "", "Folder where the products.json and inventory.json that has failed in the processing will be moved to")
+	flag.StringVar(&successProcessedFolder, "successProcessedFolder", "", "Folder where the products.json and inventory.json that were successly processed will be moved to")
+	flag.StringVar(&failProcessedFolder, "failProcessedFolder", "", "Folder where the products.json and inventory.json that has fail in the processing will be moved to")
 	flag.Parse()
 
 	flagMessge := ""
@@ -29,11 +30,11 @@ func init() {
 	if incomingDataFolder == "" {
 		flagMessge += "\n--incomingDataFolder flag must be provided"
 	}
-	if successfulProcessedFolder == "" {
-		flagMessge += "\n--successfulProcessedFolder flag must be provided"
+	if successProcessedFolder == "" {
+		flagMessge += "\n--successProcessedFolder flag must be provided"
 	}
-	if failedProcessedFolder == "" {
-		flagMessge += "\n--failedProcessedFolder flag must be provided"
+	if failProcessedFolder == "" {
+		flagMessge += "\n--failProcessedFolder flag must be provided"
 	}
 
 	if flagMessge != "" {
@@ -41,8 +42,8 @@ func init() {
 		logrus.Exit(1)
 	}
 
-	if incomingDataFolder == successfulProcessedFolder || incomingDataFolder == failedProcessedFolder || successfulProcessedFolder == failedProcessedFolder {
-		flagMessge = "The --incomingDataFolder, --successfulProcessedFolder and  --failedProcessedFolder must have different values and point to differente folders"
+	if incomingDataFolder == successProcessedFolder || incomingDataFolder == failProcessedFolder || successProcessedFolder == failProcessedFolder {
+		flagMessge = "The --incomingDataFolder, --successProcessedFolder and  --failProcessedFolder must have different values and point to differente folders"
 	}
 	if flagMessge != "" {
 		logrus.Error(flagMessge)
@@ -57,8 +58,8 @@ func init() {
 
 	logrus.Infof("logLevel = %s", logLevel)
 	logrus.Infof("incomingDataFolder = %s", incomingDataFolder)
-	logrus.Infof("successfulProcessedFolder = %s", successfulProcessedFolder)
-	logrus.Infof("failedProcessedFolder = %s", failedProcessedFolder)
+	logrus.Infof("successProcessedFolder = %s", successProcessedFolder)
+	logrus.Infof("failProcessedFolder = %s", failProcessedFolder)
 
 	//setup gin routes
 	logrus.Infof("Initialization completed")
@@ -69,11 +70,13 @@ func main() {
 	done := make(chan string)
 
 	// Start a pipeline for Articles (Inventory)
-	go watchers.StartPipeline(incomingDataFolder, successfulProcessedFolder, failedProcessedFolder, handlers.HandleIncomingDataFile("article"))
+	articleDomain := "article"
+	go watchers.StartPipeline(fmt.Sprintf("%s/%s", incomingDataFolder, articleDomain), fmt.Sprintf("%s/%s", successProcessedFolder, articleDomain), fmt.Sprintf("%s/%s", failProcessedFolder, articleDomain), handlers.HandleArticleIncomingDataFile)
 	logrus.Info("Started data ingestion watcher for Articles")
 
 	// Start a pipeline for Products
-	go watchers.StartPipeline(incomingDataFolder, successfulProcessedFolder, failedProcessedFolder, handlers.HandleIncomingDataFile("product"))
+	productDomain := "product"
+	go watchers.StartPipeline(fmt.Sprintf("%s/%s", incomingDataFolder, productDomain), fmt.Sprintf("%s/%s", successProcessedFolder, productDomain), fmt.Sprintf("%s/%s", failProcessedFolder, productDomain), handlers.HandleProductIncomingDataFile)
 	logrus.Info("Started data ingestion watcher for Products")
 
 	<-done
