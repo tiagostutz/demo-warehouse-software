@@ -101,9 +101,10 @@ export const get = async (
     });
 
     // compose the returning object with Products data + articles used to make it
-    const fullProduct = Object.assign(retrievedProduct, {
+    const fullProduct = {
+      ...retrievedProduct,
       articles: articlesOnProducts
-    });
+    };
     return { product: fullProduct, error: null };
   } catch (error) {
     log.error('Error fetching One Product by Id. Details:', error);
@@ -138,16 +139,24 @@ export const getAll = async (): Promise<ProductReturnList<Product>> => {
  * TODO: Pagination/Limit
  * @returns a list with all Products
  */
-export const getAllWithAvailability = async (): Promise<
-  ProductReturnList<ProductAvailable>
-> => {
+export const getAllWithAvailability = async (
+  id?: number
+): Promise<ProductReturnList<ProductAvailable>> => {
   try {
     // Check how the code above just looks like a GraphQL resolver!
     // If we have GraphQL, we could fire a request here and have
     // the data we need for this logic. Nice TODO: GraphQL.
 
     // 1) Retrieve all the products that will be returned
-    const allProducts = await prisma.product.findMany({});
+    let filter = {};
+    if (id) {
+      filter = {
+        where: {
+          id
+        }
+      };
+    }
+    const allProducts = await prisma.product.findMany(filter);
 
     // 2) For every Product, fetch the Product composition, that is the Articles and respective
     // quantities from ArticleOnProduct relation
