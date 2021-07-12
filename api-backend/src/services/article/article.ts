@@ -25,7 +25,9 @@ export type ArticleReturnList = {
  * @param article article to be created
  * @returns the created Article
  */
-export const upsert = async (article: Article): Promise<ArticleReturnSingle> => {
+export const upsert = async (
+  article: Article
+): Promise<ArticleReturnSingle> => {
   try {
     // get only the necessary attributes to write do Database
     // for instance, the `id` is not passed because the column is autoincrement (serial)
@@ -33,17 +35,18 @@ export const upsert = async (article: Article): Promise<ArticleReturnSingle> => 
     const articleCreated = await prisma.article.upsert({
       where: { id: article.id },
       create: { identification, name, availableStock },
-      update: { identification, name, availableStock },
+      update: { identification, name, availableStock }
     });
     return {
       article: articleCreated,
-      error: null,
+      error: null
     };
   } catch (error) {
     log.error('Error creating an Article. Details:', error);
     return {
       article: null,
-      error: 'Error inserting an Article to the database. Check the logs for more details',
+      error:
+        'Error inserting an Article to the database. Check the logs for more details'
     };
   }
 };
@@ -58,15 +61,15 @@ export const get = async (id: number): Promise<ArticleReturnSingle> => {
   try {
     const single = await prisma.article.findUnique({
       where: {
-        id,
-      },
+        id
+      }
     });
     return { article: single, error: null };
   } catch (error) {
     log.error('Error fetching One Article by Id. Details:', error);
     return {
       article: null,
-      error: 'Error fetching One Article by Id. Check the logs for more details',
+      error: 'Error fetching One Article by Id. Check the logs for more details'
     };
   }
 };
@@ -77,19 +80,21 @@ export const get = async (id: number): Promise<ArticleReturnSingle> => {
  * @param identification value to find corresponding Article
  * @returns Article or Error
  */
-export const getByIdentification = async (identification: number): Promise<ArticleReturnSingle> => {
+export const getByIdentification = async (
+  identification: number
+): Promise<ArticleReturnSingle> => {
   try {
     const single = await prisma.article.findFirst({
       where: {
-        identification,
-      },
+        identification
+      }
     });
     return { article: single, error: null };
   } catch (error) {
     log.error('Error fetching One Article by Id. Details:', error);
     return {
       article: null,
-      error: 'Error fetching One Article by Id. Check the logs for more details',
+      error: 'Error fetching One Article by Id. Check the logs for more details'
     };
   }
 };
@@ -108,7 +113,7 @@ export const getAll = async (): Promise<ArticleReturnList> => {
     log.error('Error fetching all Articles. Details:', error);
     return {
       articles: null,
-      error: 'Error fetching all Articles. Check the logs for more details',
+      error: 'Error fetching all Articles. Check the logs for more details'
     };
   }
 };
@@ -124,7 +129,7 @@ export const getAll = async (): Promise<ArticleReturnList> => {
  */
 export const updateStockByProductMade = async (
   productId: number,
-  productQuantity: number,
+  productQuantity: number
 ): Promise<ArticleReturnList> => {
   try {
     const productResult = await getProduct(productId);
@@ -136,7 +141,7 @@ export const updateStockByProductMade = async (
     if (!productResult.product) {
       return {
         error: `Could not find a Product with id=${productId}`,
-        articles: [],
+        articles: []
       };
     }
 
@@ -151,37 +156,66 @@ export const updateStockByProductMade = async (
         // fetch the article to know how many of this there currenly is in inventory
         const articleFetched = await prisma.article.findUnique({
           where: {
-            id: aop.articleId,
-          },
+            id: aop.articleId
+          }
         });
 
         // will happen just if we have a referential integrity issue, which is not likely
         // to happen as we set our model with FKs
         if (!articleFetched) {
-          return { error: `Error fetching article with ID=${aop.articleId}` };
+          return {
+            id: aop.articleId,
+            error: `Error fetching article with ID=${aop.articleId}`,
+            newStockQuantity: 0
+          };
         }
 
         // evaluate the new stock value by reducing the current availableStock
         // by the of this Article used to make the given Product and quantity of
         // products passed as param
-        const newStockQuantity = articleFetched.availableStock - productQuantity * aop.quantity;
+        const newStockQuantity =
+          articleFetched.availableStock - productQuantity * aop.quantity;
+
+        // Update on the database the value of the new Stock value
+        const updatedArticle = await prisma.article.update({
+          where: {
+            id: articleFetched.id
+          },
+          data: {
+            availableStock: newStockQuantity
+          }
+        });
+
+        // if success at Stock update, return "a summary" of the operation
+        if (updatedArticle) {
+          return {
+            ...articleFetched,
+            id: articleFetched.id,
+            previousStockQuantity: articleFetched.availableStock,
+            newStockQuantity
+          };
+        }
         return {
-          ...articleFetched,
-          previousStockQuantity: articleFetched.availableStock,
-          newStockQuantity,
+          id: articleFetched.id,
+          error: `Error retrieving info for Article id=${articleFetched.id}`
         };
-      }),
+      })
     );
 
-    articlesWithNewStockValue.map((article) => article);
-
-    const allArticles = await prisma.article.findMany({});
+    const updatesArticles = articlesWithNewStockValue.map((artc) => artc.id);
+    const allArticles = await prisma.article.findMany({
+      where: {
+        id: {
+          in: updatesArticles
+        }
+      }
+    });
     return { articles: allArticles, error: null };
   } catch (error) {
     log.error('Error fetching all Articles. Details:', error);
     return {
       articles: null,
-      error: 'Error fetching all Articles. Check the logs for more details',
+      error: 'Error fetching all Articles. Check the logs for more details'
     };
   }
 };
