@@ -1,6 +1,8 @@
 # Demo Warehouse Software
 
-A simple demo of a warehouse software with TypeScript, PostgreSQL, Prisma, Kong, Prometheus, Grafana and Go.
+A simple demo of a warehouse software with TypeScript, PostgreSQL, Prisma, Go, NextJS...
+
+![sample interaction](assets/simple-interaction.gif)
 
 ## Getting started
 
