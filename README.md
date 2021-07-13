@@ -147,6 +147,13 @@ curl http://localhost:4000/product/2
 
 Product with **id=2** should have **quantityAvailable=0**
 
+
+## Overview of the Stack
+
+* **Frontend:** NextJS with FaaS that makes the requests to the **API Backend**
+* **API Backend**: Typescript application that uses * **ExpressJS** to handle API routing, **Prisma** as ORM to access Database and **JEST** for testing.
+* **Database Auto-updater**: Golang application that watches for files being placed on a given folder and starts a Pipeline that will end up making a request to the **API Backend** to create Article and Products read and converted from files
+
 ## Development Mode
 
 To run each part individually in development mode, follow the steps bellow
