@@ -79,10 +79,15 @@ export default {
         };
 
         // invoke the service that will write the received data to the database
-        const createdArticle = await upsert(newArticle);
+        const creationResult = await upsert(newArticle);
+        if (creationResult.error) {
+          return res
+            .status(500)
+            .json({ msg: 'There was an error processing your request' });
+        }
 
         // serialize the result with special serializer because of some non-standard types, like `bigint`
-        const articleParsed = serializeNonDefaultTypes(createdArticle);
+        const articleParsed = serializeNonDefaultTypes(creationResult.article);
         return res.json(articleParsed);
       } catch (error) {
         log.error(

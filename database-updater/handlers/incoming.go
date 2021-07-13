@@ -55,7 +55,7 @@ func HandleArticleIncomingDataFile(filePath, sucessfulFoder, failFolder string) 
 		// Good candidate to run in a separate go routine of to put this in a queue
 		// but now, lets keep it sync and simple
 		// Create Article in the Warehouse API
-		postArticleToWarehouse(*articleWarehouse)
+		PostArticle(*articleWarehouse)
 	}
 
 	logrus.Debugf("New Article data succesfully ingested. Moving to %s folder", sucessfulFoder)
@@ -64,12 +64,6 @@ func HandleArticleIncomingDataFile(filePath, sucessfulFoder, failFolder string) 
 	os.Rename(filePath, sucessfulFoder+"/"+fileName)
 	return nil
 }
-
-func postArticleToWarehouse(article model.ArticleWarehouse) error {
-	logrus.Debugf("POST Article to Warehouse API %#v", article)
-	return nil
-}
-
 func HandleProductIncomingDataFile(filePath, sucessfulFoder, failFolder string) error {
 	logrus.Debugf("Incoming data for a new Product. File name: %s", filePath)
 
@@ -113,17 +107,12 @@ func HandleProductIncomingDataFile(filePath, sucessfulFoder, failFolder string) 
 		// Good candidate to run in a separate go routine of to put this in a queue
 		// but now, lets keep it sync and simple
 		// Create Product in the Warehouse API
-		postProductToWarehouse(*productWarehouse)
+		PostProduct(*productWarehouse)
 	}
 
 	logrus.Debugf("New Article data succesfully ingested. Moving to %s folder", sucessfulFoder)
 
 	// move to sucess folder
 	os.Rename(filePath, sucessfulFoder+"/"+fileName)
-	return nil
-}
-
-func postProductToWarehouse(product model.ProductWarehouse) error {
-	logrus.Debugf("POST Product to Warehouse API %#v", product)
 	return nil
 }

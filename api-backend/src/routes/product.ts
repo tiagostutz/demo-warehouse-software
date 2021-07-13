@@ -82,10 +82,14 @@ export default {
         const articles = req.body.articles ? req.body.articles : [];
 
         // invoke the service that will write the received data to the database
-        const createdProduct = await upsert(basicData, articles);
-
+        const creationResult = await upsert(basicData, articles);
+        if (creationResult.error) {
+          res
+            .status(500)
+            .json({ msg: 'There was an error processing your request' });
+        }
         // serialize the result with special serializer because of some non-standard types, like `bigint`
-        const productParsed = serializeNonDefaultTypes(createdProduct);
+        const productParsed = serializeNonDefaultTypes(creationResult.product);
         return res.json(productParsed);
       } catch (error) {
         log.error(

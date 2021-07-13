@@ -1,0 +1,4 @@
+package globals
+
+var WarehouseArticleEndpoint string
+var WarehouseProductEndpoint string
