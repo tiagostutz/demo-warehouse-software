@@ -12,6 +12,8 @@ import (
 var incomingDataFolder string
 var successProcessedFolder string
 var failProcessedFolder string
+var warehouseArticleEndpoint string
+var warehouseProductEndpoint string
 
 func init() {
 
@@ -23,6 +25,8 @@ func init() {
 	flag.StringVar(&incomingDataFolder, "incomingDataFolder", "", "Folder where the products.json and inventory.json will be placed to get the read the data from")
 	flag.StringVar(&successProcessedFolder, "successProcessedFolder", "", "Folder where the products.json and inventory.json that were successly processed will be moved to")
 	flag.StringVar(&failProcessedFolder, "failProcessedFolder", "", "Folder where the products.json and inventory.json that has fail in the processing will be moved to")
+	flag.StringVar(&warehouseArticleEndpoint, "warehouseArticleEndpoint", "", "Endpoint of the Article Warehouse API")
+	flag.StringVar(&warehouseProductEndpoint, "warehouseProductEndpoint", "", "Endpoint of the Product Warehouse API")
 	flag.Parse()
 
 	flagMessge := ""
