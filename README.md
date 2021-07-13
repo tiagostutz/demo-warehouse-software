@@ -4,6 +4,37 @@ A simple demo of a warehouse software with TypeScript, PostgreSQL, Prisma, Kong,
 
 ## Getting started
 
+### Option 1
+
+```bash
+git clone https://github.com/tiagostutz/demo-warehouse-software
+```
+
+```bash
+docker-compose up
+```
+
+Wait for the services to be ready and then populate the database with using the file watch:
+
+```bash
+cp assets/inventory.json local-data/incoming/article/
+```
+
+```bash
+cp assets/products.json local-data/incoming/product/
+```
+
+```bash
+cd web-app
+yarn install
+yarn build
+yarn start
+```
+
+Open [http://localhost:3000](http://localhost:3000) on your Browser and check
+
+### Option 2
+
 1) Create this docker-compose.yml:
 
 ```yaml
@@ -12,7 +43,6 @@ version: "3.7"
 services:
   db:
     image: tiagostutz/warehouse-demo-postgres:0.0.3
-    build: sql
     environment:
       - POSTGRES_DB=demo-warehouse
       - POSTGRES_PASSWORD=123456
@@ -22,7 +52,6 @@ services:
 
   api-backend:
     image: tiagostutz/warehouse-demo-api-backend:0.0.3
-    build: api-backend
     ports:
       - 4000:4000
     environment:
@@ -30,7 +59,6 @@ services:
 
   database-updater:
     image: tiagostutz/warehouse-demo-database-updater:0.0.3
-    build: database-updater
     volumes:
       - ./local-data:/app/data
     environment:
