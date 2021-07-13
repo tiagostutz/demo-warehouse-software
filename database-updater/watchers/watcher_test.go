@@ -1,6 +1,7 @@
 package watchers
 
 import (
+	"database-autoupdater/globals"
 	"os"
 	"testing"
 )
@@ -8,7 +9,7 @@ import (
 var baseTestFolder, incomingDataFolder, successProcessedFolder, failProcessedFolder, domain string
 
 func setup() error {
-
+	globals.WarehouseArticleEndpoint = "http://localhost:4000/article"
 	domain = "dummy"
 	baseTestFolder = "dummy-test"
 	incomingDataFolder = baseTestFolder + "/incoming/" + domain

@@ -1,5 +1,6 @@
 data/**/*.json
-go.sum
+
 __debug_bin
 watchers/dummy-test
 debug.test
+database-autoupdater

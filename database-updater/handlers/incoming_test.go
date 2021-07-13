@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database-autoupdater/globals"
 	"database-autoupdater/helpers"
 	"fmt"
 	"os"
@@ -12,6 +13,7 @@ import (
 var baseTestFolder, incomingDataFolder, successProcessedFolder, failProcessedFolder, domain string
 
 func setup() error {
+	globals.WarehouseArticleEndpoint = "http://localhost:4000/article"
 	baseTestFolder = "test-folder"
 
 	domain = "foo"

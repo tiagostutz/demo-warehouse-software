@@ -1,6 +1,7 @@
 package model
 
 import (
+	"database-autoupdater/globals"
 	"fmt"
 	"testing"
 
@@ -8,6 +9,7 @@ import (
 )
 
 func TestConvertArticleIncomingToWarehouse(t *testing.T) {
+	globals.WarehouseArticleEndpoint = "http://localhost:4000/article"
 	articleIncoming := ArticleIncoming{
 		ArtId: "1",
 		Stock: "100",
@@ -21,6 +23,7 @@ func TestConvertArticleIncomingToWarehouse(t *testing.T) {
 }
 
 func TestConvertProductIncomingToWarehouse(t *testing.T) {
+	globals.WarehouseArticleEndpoint = "http://localhost:4000/article"
 	productIncoming := ProductIncoming{
 		Name:  "Bar",
 		Price: "99.99",

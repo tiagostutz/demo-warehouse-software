@@ -4,8 +4,118 @@ A simple demo of a warehouse software with TypeScript, PostgreSQL, Prisma, Kong,
 
 ## Getting started
 
-There are two main components: API Backend and Database auto-updater.
+1) Create this docker-compose.yml:
 
+```yaml
+version: "3.7"
+
+services:
+  db:
+    image: tiagostutz/warehouse-demo-postgres:0.0.3
+    build: sql
+    environment:
+      - POSTGRES_DB=demo-warehouse
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_INITDB_ARGS=--debug
+    ports:
+      - 5432:5432
+
+  api-backend:
+    image: tiagostutz/warehouse-demo-api-backend:0.0.3
+    build: api-backend
+    ports:
+      - 4000:4000
+    environment:
+      - DATABASE_URL=postgres://postgres:123456@db:5432/demo-warehouse
+
+  database-updater:
+    image: tiagostutz/warehouse-demo-database-updater:0.0.3
+    build: database-updater
+    volumes:
+      - ./local-data:/app/data
+    environment:
+      - LOG_LEVEL=debug
+      - WAREHOUSE_ARTICLE_ENDPOINT=http://api-backend:4000/article
+      - WAREHOUSE_PRODUCT_ENDPOINT=http://api-backend:4000/product
+```
+
+And bring it up:
+
+```bash
+docker-compose up
+```
+
+2) After all the services are up, check that the database is clean by executing:
+
+```bash
+curl http://localhost:4000/article
+```
+
+```bash
+curl http://localhost:4000/product
+```
+
+They should return and empty array `[]` as the response.
+
+3) Now let's put some Articles from the [inventory.json](assets/inventory.json) file. To do this, you need to copy this file to the folder the database auto-updater is watching for. Execute this:
+
+```bash
+cp assets/inventory.json local-data/incoming/article/
+```
+
+Check again the return of the API:
+
+```bash
+curl http://localhost:4000/article
+```
+
+4) Now let's put some Products from the [products.json](assets/products.json) file. To do this, you need to copy this file to the folder the database auto-updater is watching for. Execute this:
+
+```bash
+cp assets/products.json local-data/incoming/product/
+```
+
+Check again the return of the API:
+
+```bash
+curl http://localhost:4000/product
+```
+
+5) Let's get some details on the products created, like the quantity available based on the invetory stock:
+
+```bash
+curl http://localhost:4000/product/1
+```
+
+```bash
+curl http://localhost:4000/product/2
+```
+
+If all went as expected, the `quantityAvailable` of this Product with **id=1** should be `2` and of the Product with **id=2** should be `1`.
+
+6) Finally, let's update the inventory stock (reduce) simulating as if a second product was bought and let's check the quantity of the first:
+
+```bash
+curl --location --request POST 'http://localhost:4000/article/stock-update/by/product/2' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "quantity": 1
+}'
+```
+
+And let's check how the quantity available of the Products we have now:
+
+```bash
+curl http://localhost:4000/product/1
+```
+
+Product with **id=1** should have **quantityAvailable=1**
+
+```bash
+curl http://localhost:4000/product/2
+```
+
+Product with **id=2** should have **quantityAvailable=0**
 ### API Backend
 
 To start, clone this repo:
@@ -67,27 +177,32 @@ curl -X GET "https://localhost:4001/products"
 ## Evolution Stages
 
 **Stage 1** (current implementation): no security, no load handling, no caching
-![stage 1 overview](system-design-stage-1.jpg)
+![stage 1 overview](assets/system-design-stage-1.jpg)
 
 **Stage 2** (goal of this project): security, load balancing one level (API Gateway), no caching
-![stage 2 overview](system-design-stage-2.jpg)
+![stage 2 overview](assets/system-design-stage-2.jpg)
 
 **Stage 3** (start production): security, load balancing one level (API Gateway), observability, caching
-![stage 3 overview](system-design-stage-3.jpg)
+![stage 3 overview](assets/system-design-stage-3.jpg)
 
 **Stage 4** (scaling to the cloud): security, load handling, caching, observability, database replica/shard, job scheduling with queues and workflow management
-![stage 4 overview](system-design-stage-4.jpg)
-
-## Check some metrics
-
-Check the metrics at [https://localhost:4002](https://localhost:4002) with the following credentials:
-
-- login: **admin**
-- password: **admin**
+![stage 4 overview](assets/system-design-stage-4.jpg)
 
 ## Testing
 
-There are two levels of tests: component/service/unit level and integration/API level test
+There are two levels of tests: component/service/unit level and integration/API level test.
+
+Running **API Backend** tests:
+
+```bash
+yarn run test
+```
+
+To run the **Database Auto-updater** integrated tests, you need the database and one instance of the API Backend up at **localhost:4000**, then run:
+
+```bash
+go test ./...
+```
 
 ### API Backend
 

@@ -72,7 +72,7 @@ func watchForNewFiles(watchPath string, fileName chan string) {
 		case event := <-watcher.Events:
 			// send the file name only if the detected change was a
 			// file creation
-			if event.Op == fsnotify.Create {
+			if event.Op == fsnotify.Create || event.Op == fsnotify.Rename || event.Op == fsnotify.Write {
 				fileName <- event.Name
 			}
 

@@ -25,7 +25,8 @@
     "lint": "yarn eslint . --ext .js,.ts --fix",
     "test": "DATABASE_URL=postgres://postgres:123456@localhost:5432/demo-warehouse npx jest --forceExit --watch --detectOpenHandles",
     "migrate": "DATABASE_URL=postgres://postgres:123456@localhost:5432/demo-warehouse npx prisma migrate dev --name init",
-    "prisma": "npx prisma generate"
+    "prisma": "npx prisma generate",
+    "build": "tsc -p ."
   },
   "dependencies": {
     "@prisma/client": "2.26.0",

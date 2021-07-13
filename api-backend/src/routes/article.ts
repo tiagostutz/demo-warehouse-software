@@ -105,11 +105,11 @@ export default {
     /**
      * Update Article stock based on Product selling event
      */
-    app.post(`/${prefix}/product/:id/stock-update`, async (req, res) => {
+    app.post(`/${prefix}/stock-update/by/product/:id`, async (req, res) => {
       try {
         // handle the `quantity` query param to guarantee we have a valid value
-        const quantity = req.query.quantity
-          ? parseInt(`${req.query.quantity}`, 10)
+        const quantity = req.body.quantity
+          ? parseInt(`${req.body.quantity}`, 10)
           : 1;
 
         // invoke the update Stock service

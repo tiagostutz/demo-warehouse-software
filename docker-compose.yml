@@ -1,13 +1,35 @@
 version: "3.7"
 
 services:
+  # Database image with an provisioned schema and empty data
   db:
-    image: postgres:9.6.5
+    image: tiagostutz/warehouse-demo-postgres:0.0.2
+    build: sql
+    # Debug and profiling mode
     command: postgres -c log_min_duration_statement=10 -c log_statement=all -c shared_preload_libraries=pg_stat_statements -c pg_stat_statements.track=all
-    network_mode: bridge
     environment:
       - POSTGRES_DB=demo-warehouse
       - POSTGRES_PASSWORD=123456
       - POSTGRES_INITDB_ARGS=--debug
     ports:
       - 5432:5432
+
+    # API that interacts with the database to write and read data
+  api-backend:
+    image: tiagostutz/warehouse-demo-api-backend:0.0.2
+    build: api-backend
+    ports:
+      - 4000:4000
+    environment:
+      - DATABASE_URL=postgres://postgres:123456@db:5432/demo-warehouse
+
+    # File watcher that takes incoming JSON files and POST them to the API to write to the database
+  database-updater:
+    image: tiagostutz/warehouse-demo-database-updater:0.0.2
+    build: database-updater
+    volumes:
+      - ./local-data:/app/data
+    environment:
+      - LOG_LEVEL=debug
+      - WAREHOUSE_ARTICLE_ENDPOINT=http://api-backend:4000/article
+      - WAREHOUSE_PRODUCT_ENDPOINT=http://api-backend:4000/product
