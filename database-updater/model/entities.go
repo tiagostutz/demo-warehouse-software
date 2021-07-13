@@ -57,6 +57,11 @@ type Inventory struct {
 	Inventory []ArticleIncoming `json:"inventory"`
 }
 
+// IncomingProducts represents the root of the products file
+type IncomingProducts struct {
+	Products []ProductIncoming `json:"products"`
+}
+
 func ConvertArticleIncomingToWarehouse(articleIncoming ArticleIncoming) *ArticleWarehouse {
 	// convert the ID field to Int, which is the type used in the
 	// Warehouse API

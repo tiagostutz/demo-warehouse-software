@@ -81,5 +81,34 @@ func TestHandleArticleIncomingDataFile(t *testing.T) {
 }
 
 func TestHandleProductIncomingDataFile(t *testing.T) {
+	setup()
 
+	productsFileName := "products.json"
+	incomingFile := fmt.Sprintf("%s/%s", incomingDataFolder, productsFileName)
+	err := HandleProductIncomingDataFile(incomingFile, successProcessedFolder, failProcessedFolder)
+	// must return error because the file doesnt exist
+	if err == nil {
+		t.Fail()
+	}
+
+	// copy the file to incoming folder to process
+	_, err = helpers.CopyFile("test-data/"+productsFileName, incomingFile)
+	if err != nil {
+		t.Fail()
+	}
+
+	err = HandleProductIncomingDataFile(incomingFile, successProcessedFolder, failProcessedFolder)
+	if err != nil {
+		t.Fail()
+	}
+
+	f, err := os.Stat(successProcessedFolder + "/" + productsFileName)
+	if err != nil {
+		t.Fail()
+	}
+
+	// check the file is in the success place
+	assert.Equal(t, f.Name(), productsFileName)
+
+	teardown()
 }

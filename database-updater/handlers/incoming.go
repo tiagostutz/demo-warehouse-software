@@ -72,7 +72,58 @@ func postArticleToWarehouse(article model.ArticleWarehouse) error {
 
 func HandleProductIncomingDataFile(filePath, sucessfulFoder, failFolder string) error {
 	logrus.Debugf("Incoming data for a new Product. File name: %s", filePath)
-	logrus.Debugf("Error ingesting received Product data. Moving to %s folder", failFolder)
-	logrus.Debugf("New Product data succesfully ingested. Moving to %s folder", sucessfulFoder)
+
+	// Resolve file name. Used to move from the folders
+	fileName := filepath.Base(filePath)
+
+	// Open the received JSON File
+	jsonFile, err := os.Open(filePath)
+	if err != nil {
+		logrus.Errorf("Error opening incoming Product file. Moving to %s folder", failFolder)
+		// move the file to the error folder
+		os.Rename(filePath, failFolder+"/"+fileName)
+		return err
+	}
+
+	// defer the closing the file
+	defer jsonFile.Close()
+
+	// get the byte content of the file
+	byteValue, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		logrus.Errorf("Error reading bytes of incoming Product file. Moving to %s folder", failFolder)
+		// move the file to the error folder
+		os.Rename(filePath, failFolder+"/"+fileName)
+		return err
+	}
+
+	var products model.IncomingProducts
+	// unmarshal byteArray into article
+	err = json.Unmarshal(byteValue, &products)
+	if err != nil {
+		logrus.Errorf("Error unmarshalling bytes of incoming Product array to correspondant var. Moving to %s folder", failFolder)
+		// move the file to the error folder
+		os.Rename(filePath, failFolder+"/"+fileName)
+		return err
+	}
+
+	// convert the ProductIncoming to ArticleWarehouse
+	for i := 0; i < len(products.Products); i++ {
+		productWarehouse := model.ConvertProductIncomingToWarehouse(products.Products[i])
+		// Good candidate to run in a separate go routine of to put this in a queue
+		// but now, lets keep it sync and simple
+		// Create Product in the Warehouse API
+		postProductToWarehouse(*productWarehouse)
+	}
+
+	logrus.Debugf("New Article data succesfully ingested. Moving to %s folder", sucessfulFoder)
+
+	// move to sucess folder
+	os.Rename(filePath, sucessfulFoder+"/"+fileName)
+	return nil
+}
+
+func postProductToWarehouse(product model.ProductWarehouse) error {
+	logrus.Debugf("POST Product to Warehouse API %#v", product)
 	return nil
 }
