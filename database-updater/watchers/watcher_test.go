@@ -8,34 +8,35 @@ import (
 var baseTestFolder, incomingDataFolder, successProcessedFolder, failProcessedFolder, domain string
 
 func setup() error {
+
+	domain = "dummy"
 	baseTestFolder = "dummy-test"
-	incomingDataFolder = baseTestFolder + "/incoming"
-	successProcessedFolder = baseTestFolder + "/success"
-	failProcessedFolder = baseTestFolder + "/faild"
+	incomingDataFolder = baseTestFolder + "/incoming/" + domain
+	successProcessedFolder = baseTestFolder + "/success/" + domain
+	failProcessedFolder = baseTestFolder + "/fail/" + domain
 
 	os.RemoveAll(baseTestFolder)
 
-	err := os.Mkdir(baseTestFolder, 0777)
+	err := os.MkdirAll(baseTestFolder, 0777)
 	if err != nil {
 		return err
 	}
 
-	err = os.Mkdir(incomingDataFolder, 0777)
+	err = os.MkdirAll(incomingDataFolder, 0777)
 	if err != nil {
 		return err
 	}
 
-	err = os.Mkdir(successProcessedFolder, 0777)
+	err = os.MkdirAll(successProcessedFolder, 0777)
 	if err != nil {
 		return err
 	}
 
-	err = os.Mkdir(failProcessedFolder, 0777)
+	err = os.MkdirAll(failProcessedFolder, 0777)
 	if err != nil {
 		return err
 	}
 
-	domain = "dummy"
 	return nil
 }
 func teardown() {

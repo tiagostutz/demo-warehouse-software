@@ -76,7 +76,7 @@ func ConvertArticleIncomingToWarehouse(articleIncoming ArticleIncoming) *Article
 
 	// return the converted Article
 	return &ArticleWarehouse{
-		ID:             int32(id),
+		Identification: int32(id),
 		Name:           articleIncoming.Name,
 		AvailableStock: int32(stock),
 	}

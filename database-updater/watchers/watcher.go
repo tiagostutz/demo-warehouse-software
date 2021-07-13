@@ -11,7 +11,7 @@ import (
 // where files placed at incomingDataFolder will be processed and, if they are OK, the will
 // be POSTed to the Warehouse API and moved to the sucessfullFolder. Otherwhise they won't be
 // POSTed and they will be moved to the failProcessedFolder
-func StartPipeline(incomingDataFolder string, successProcessedFolder string, failProcessedFolder string, handleIncomingData func(string, string, string)) {
+func StartPipeline(incomingDataFolder string, successProcessedFolder string, failProcessedFolder string, handleIncomingData func(string, string, string) error) {
 	pendingFile := make(chan string)
 	successFile := make(chan string)
 	failFile := make(chan string)
