@@ -116,62 +116,56 @@ curl http://localhost:4000/product/2
 ```
 
 Product with **id=2** should have **quantityAvailable=0**
+
+## Development Mode
+
+To run each part individually in development mode, follow the steps bellow
 ### API Backend
 
-To start, clone this repo:
+To run api-backend in development mode, first clone this repo:
 
 ```bash
 git clone https://github.com/tiagostutz/demo-warehouse-software.git
 ```
 
-Then bring all the components up:
+Bring the database up:
 
 ```bash
-docker-compose up --build
+docker-compose up db
 ```
 
-After that, copy the [invetory.json](invetory.json) to the **invetory-files** folder and check the logs to see confirm that the Articles were correctly imported from it. Once the Articles are inserted, copy the [products.json](products.json) to the **product-files** folder and check the logs to see the Products being inserted.
-
-Now, with some data on the DB, fetch some products and some articles:
+Then go to the [api-backend](api-backend) folder and run
 
 ```bash
-curl http://localhost:4000/article
+yarn install
 ```
 
+Run the tests:
+
 ```bash
-curl http://localhost:4000/product
+yarn test
 ```
 
-Replace **:id** bellow by a Product ID returned in the previous `curl` to check a more complete return of Product details
+Start the API in development mode:
 
 ```bash
-curl http://localhost:4000/product/:id
+yarn run dev
 ```
 
 ### Database auto-updater
 
-To see the auto-updater loading new Articles from a file, copy the [test-files/new-articles.json](test-files/new-articles.json) to the [processing-files](processing-files) folder:
+First, bring the database and the api-backend up (described in the previous session).
+
+After that, run
 
 ```bash
-cp test-files/new-articles.json processing-files/
+go mod download
 ```
 
-Check the logs and fetch again the articles
+Then, to run the tests run:
 
 ```bash
-curl -X GET "https://localhost:4001/articles"
-```
-
-The same goes to the Product. Copy the [test-files/new-products.json](test-files/new-products.json) to the [processing-files](processing-files) folder:
-
-```bash
-cp test-files/new-products.json processing-files/
-```
-
-Check the logs and fetch again the products
-
-```bash
-curl -X GET "https://localhost:4001/products"
+go test ./...
 ```
 
 ## Evolution Stages
