@@ -14,7 +14,9 @@
         "--logLevel=debug",
         "--incomingDataFolder=data/incoming",
         "--successProcessedFolder=data/success",
-        "--failProcessedFolder=data/fail"
+        "--failProcessedFolder=data/fail",
+        "--warehouseArticleEndpoint=http://localhost:4000/article",
+        "--warehouseProductEndpoint=http://localhost:4000/product"
       ]
     }
   ]

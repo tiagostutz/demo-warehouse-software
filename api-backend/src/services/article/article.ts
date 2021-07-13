@@ -105,9 +105,21 @@ export const getByIdentification = async (
  *
  * @returns a list with all Articles
  */
-export const getAll = async (): Promise<ArticleReturnList> => {
+export const getAll = async ({
+  identification
+}: {
+  identification: number | undefined;
+}): Promise<ArticleReturnList> => {
   try {
-    const allArticles = await prisma.article.findMany({});
+    let filter = {};
+    if (identification) {
+      filter = {
+        where: {
+          identification
+        }
+      };
+    }
+    const allArticles = await prisma.article.findMany(filter);
     return { articles: allArticles, error: null };
   } catch (error) {
     log.error('Error fetching all Articles. Details:', error);

@@ -49,7 +49,7 @@ func watchForNewFiles(watchPath string, fileName chan string) {
 
 	// if the folder doesnt exist, create it
 	if _, err := os.Stat(watchPath); os.IsNotExist(err) {
-		os.Mkdir(watchPath, 0777)
+		os.MkdirAll(watchPath, 0777)
 	}
 
 	// Creates a new file watcher

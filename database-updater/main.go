@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database-autoupdater/globals"
 	"database-autoupdater/handlers"
 	"database-autoupdater/watchers"
 	"flag"
@@ -25,24 +26,30 @@ func init() {
 	flag.StringVar(&incomingDataFolder, "incomingDataFolder", "", "Folder where the products.json and inventory.json will be placed to get the read the data from")
 	flag.StringVar(&successProcessedFolder, "successProcessedFolder", "", "Folder where the products.json and inventory.json that were successly processed will be moved to")
 	flag.StringVar(&failProcessedFolder, "failProcessedFolder", "", "Folder where the products.json and inventory.json that has fail in the processing will be moved to")
-	flag.StringVar(&warehouseArticleEndpoint, "warehouseArticleEndpoint", "", "Endpoint of the Article Warehouse API")
-	flag.StringVar(&warehouseProductEndpoint, "warehouseProductEndpoint", "", "Endpoint of the Product Warehouse API")
+	flag.StringVar(&warehouseArticleEndpoint, "warehouseArticleEndpoint", "", "Endpoint of the Article Warehouse API. E.g.: http://localhost:4000/article")
+	flag.StringVar(&warehouseProductEndpoint, "warehouseProductEndpoint", "", "Endpoint of the Product Warehouse API. E.g.: http://localhost:4000/product")
 	flag.Parse()
 
 	flagMessge := ""
 
 	if incomingDataFolder == "" {
-		flagMessge += "\n--incomingDataFolder flag must be provided"
+		flagMessge += "--incomingDataFolder flag must be provided\n"
 	}
 	if successProcessedFolder == "" {
-		flagMessge += "\n--successProcessedFolder flag must be provided"
+		flagMessge += "--successProcessedFolder flag must be provided\n"
 	}
 	if failProcessedFolder == "" {
-		flagMessge += "\n--failProcessedFolder flag must be provided"
+		flagMessge += "--failProcessedFolder flag must be provided\n"
+	}
+	if warehouseArticleEndpoint == "" {
+		flagMessge += "--warehouseArticleEndpoint flag must be provided\n"
+	}
+	if warehouseProductEndpoint == "" {
+		flagMessge += "--warehouseProductEndpoint flag must be provided\n"
 	}
 
 	if flagMessge != "" {
-		logrus.Error(flagMessge)
+		fmt.Println(flagMessge)
 		logrus.Exit(1)
 	}
 
@@ -60,10 +67,15 @@ func init() {
 	}
 	logrus.SetLevel(l)
 
+	globals.WarehouseArticleEndpoint = warehouseArticleEndpoint
+	globals.WarehouseProductEndpoint = warehouseProductEndpoint
+
 	logrus.Infof("logLevel = %s", logLevel)
 	logrus.Infof("incomingDataFolder = %s", incomingDataFolder)
 	logrus.Infof("successProcessedFolder = %s", successProcessedFolder)
 	logrus.Infof("failProcessedFolder = %s", failProcessedFolder)
+	logrus.Infof("warehouseArticleEndpoint = %s", warehouseArticleEndpoint)
+	logrus.Infof("warehouseProductEndpoint = %s", warehouseProductEndpoint)
 
 	//setup gin routes
 	logrus.Infof("Initialization completed")

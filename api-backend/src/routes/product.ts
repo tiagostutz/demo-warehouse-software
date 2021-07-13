@@ -84,7 +84,7 @@ export default {
         // invoke the service that will write the received data to the database
         const creationResult = await upsert(basicData, articles);
         if (creationResult.error) {
-          res
+          return res
             .status(500)
             .json({ msg: 'There was an error processing your request' });
         }

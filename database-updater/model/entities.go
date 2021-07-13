@@ -1,7 +1,12 @@
 package model
 
 import (
+	"database-autoupdater/globals"
+	"encoding/json"
+	"fmt"
+	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -117,8 +122,17 @@ func ConvertProductIncomingToWarehouse(productIncoming ProductIncoming) *Product
 			logrus.Errorf("Error converting ProductIncoming Contained Article AmoutOf. Details: %s", err)
 			return nil
 		}
+		articleResolved, err := GetArticleByIdentification(int32(artId))
+		if err != nil {
+			logrus.Errorf("Error resolving Article to get ID to build the relationship with Product. Details: %s", err)
+			return nil
+		}
+		if articleResolved == nil {
+			logrus.Errorf("Could not find an Article to get ID to build the relationship with Product. Details: %s", err)
+			return nil
+		}
 		articleComposition := ProductArticlesWarehouse{
-			ArticleID: int32(artId),
+			ArticleID: articleResolved.ID,
 			Quantity:  int32(quantity),
 		}
 		articlesMadeOf = append(articlesMadeOf, articleComposition)
@@ -129,4 +143,40 @@ func ConvertProductIncomingToWarehouse(productIncoming ProductIncoming) *Product
 		Price:    float32(price),
 		Articles: articlesMadeOf,
 	}
+}
+
+// GetArticle fetches an Article from Warehouse
+func GetArticleByIdentification(id int32) (*ArticleWarehouse, error) {
+
+	url := globals.WarehouseArticleEndpoint
+	logrus.Debugf("Getting an Article from Warehouse API. URL: %s", url)
+
+	var httpClient = &http.Client{Timeout: 30 * time.Second}
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s?identification=%d", url, id), nil)
+	if err != nil {
+		logrus.Errorf("Error preparing the request to GET a new Article to Warehouse API. Details: %s", err)
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		logrus.Errorf("Error doing the request to GET an Article to Warehouse API. Details: %s", err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode > 299 {
+		return nil, fmt.Errorf("error POSTing to Warehouse API. Status: %s", resp.Status)
+	}
+
+	var articleFetched []ArticleWarehouse
+	err = json.NewDecoder(resp.Body).Decode(&articleFetched)
+	if err != nil {
+		logrus.Errorf("Error decoding the response of the Post a new Article to Warehouse API. Details: %s", err)
+		return nil, err
+	}
+	if len(articleFetched) == 0 {
+		return nil, nil
+	}
+	return &articleFetched[0], nil
 }

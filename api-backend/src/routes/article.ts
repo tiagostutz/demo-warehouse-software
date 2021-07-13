@@ -21,10 +21,14 @@ export default {
     /**
      * Retrieve all the articles
      */
-    app.get(`/${prefix}`, async (_, res) => {
+    app.get(`/${prefix}`, async (req, res) => {
       try {
         // Invoke the service to get all the articles
-        const allArticles = await getAll();
+        const allArticles = await getAll({
+          identification: req.query.identification
+            ? parseInt(req.query.identification?.toString(), 10)
+            : undefined
+        });
 
         // serialize the result with special serializer because of some non-standard types, like `bigint`
         const articlesParsed = serializeNonDefaultTypes(allArticles.articles);

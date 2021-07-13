@@ -21,7 +21,7 @@ func HandleArticleIncomingDataFile(filePath, sucessfulFoder, failFolder string) 
 	// Open the received JSON File
 	jsonFile, err := os.Open(filePath)
 	if err != nil {
-		logrus.Errorf("Error opening incoming Article file. Moving to %s folder", failFolder)
+		logrus.Errorf("Error opening incoming Article file. Moving to %s folder. Details: %s", failFolder, err)
 		// move the file to the error folder
 		os.Rename(filePath, failFolder+"/"+fileName)
 		return err
@@ -33,7 +33,7 @@ func HandleArticleIncomingDataFile(filePath, sucessfulFoder, failFolder string) 
 	// get the byte content of the file
 	byteValue, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
-		logrus.Errorf("Error reading bytes of incoming Article file. Moving to %s folder", failFolder)
+		logrus.Errorf("Error reading bytes of incoming Article file. Moving to %s folder. Details: %s", failFolder, err)
 		// move the file to the error folder
 		os.Rename(filePath, failFolder+"/"+fileName)
 		return err
@@ -43,7 +43,7 @@ func HandleArticleIncomingDataFile(filePath, sucessfulFoder, failFolder string) 
 	// unmarshal byteArray into article
 	err = json.Unmarshal(byteValue, &inventory)
 	if err != nil {
-		logrus.Errorf("Error unmarshalling bytes of incoming Article to correspondant var. Moving to %s folder", failFolder)
+		logrus.Errorf("Error unmarshalling bytes of incoming Article to correspondant var. Moving to %s folder. Details: %s", failFolder, err)
 		// move the file to the error folder
 		os.Rename(filePath, failFolder+"/"+fileName)
 		return err
@@ -55,7 +55,13 @@ func HandleArticleIncomingDataFile(filePath, sucessfulFoder, failFolder string) 
 		// Good candidate to run in a separate go routine of to put this in a queue
 		// but now, lets keep it sync and simple
 		// Create Article in the Warehouse API
-		PostArticle(*articleWarehouse)
+		err := PostArticle(*articleWarehouse)
+		if err != nil {
+			// for now we will quit the full execution
+			logrus.Errorf("Error posting an Article to the Warehouse Database. Details: %s", err)
+			os.Rename(filePath, failFolder+"/"+fileName)
+			return err
+		}
 	}
 
 	logrus.Debugf("New Article data succesfully ingested. Moving to %s folder", sucessfulFoder)
@@ -73,7 +79,7 @@ func HandleProductIncomingDataFile(filePath, sucessfulFoder, failFolder string) 
 	// Open the received JSON File
 	jsonFile, err := os.Open(filePath)
 	if err != nil {
-		logrus.Errorf("Error opening incoming Product file. Moving to %s folder", failFolder)
+		logrus.Errorf("Error opening incoming Product file. Moving to %s folder. Details: %s", failFolder, err)
 		// move the file to the error folder
 		os.Rename(filePath, failFolder+"/"+fileName)
 		return err
@@ -85,17 +91,17 @@ func HandleProductIncomingDataFile(filePath, sucessfulFoder, failFolder string) 
 	// get the byte content of the file
 	byteValue, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
-		logrus.Errorf("Error reading bytes of incoming Product file. Moving to %s folder", failFolder)
+		logrus.Errorf("Error reading bytes of incoming Product file. Moving to %s folder. Details: %s", failFolder, err)
 		// move the file to the error folder
 		os.Rename(filePath, failFolder+"/"+fileName)
 		return err
 	}
 
 	var products model.IncomingProducts
-	// unmarshal byteArray into article
+	// unmarshal byteArray into product
 	err = json.Unmarshal(byteValue, &products)
 	if err != nil {
-		logrus.Errorf("Error unmarshalling bytes of incoming Product array to correspondant var. Moving to %s folder", failFolder)
+		logrus.Errorf("Error unmarshalling bytes of incoming Product array to correspondant var. Moving to %s folder. Details: %s", failFolder, err)
 		// move the file to the error folder
 		os.Rename(filePath, failFolder+"/"+fileName)
 		return err
@@ -107,10 +113,16 @@ func HandleProductIncomingDataFile(filePath, sucessfulFoder, failFolder string) 
 		// Good candidate to run in a separate go routine of to put this in a queue
 		// but now, lets keep it sync and simple
 		// Create Product in the Warehouse API
-		PostProduct(*productWarehouse)
+		err := PostProduct(*productWarehouse)
+		if err != nil {
+			// for now we will quit the full execution
+			logrus.Errorf("Error posting an Product to the Warehouse Database. Details: %s", err)
+			os.Rename(filePath, failFolder+"/"+fileName)
+			return err
+		}
 	}
 
-	logrus.Debugf("New Article data succesfully ingested. Moving to %s folder", sucessfulFoder)
+	logrus.Debugf("New Product data succesfully ingested. Moving to %s folder", sucessfulFoder)
 
 	// move to sucess folder
 	os.Rename(filePath, sucessfulFoder+"/"+fileName)
