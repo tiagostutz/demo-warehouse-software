@@ -20,6 +20,14 @@ export type ArticleReturnList = {
 // ------
 
 /**
+ * Checks db connection by simple query
+ */
+
+ export const checkArticleHealth = async () => {
+  return await prisma.article.count();
+}
+
+/**
  * Writes an Article to the database
  *
  * @param article article to be created

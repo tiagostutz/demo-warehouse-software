@@ -11,7 +11,15 @@ export default {
      * - 204 : the service is OK
      * - 404 : the service is Degraded
      */
-    app.get(`/${prefix}/health`, async (_, res) => res.status(204).send());
+     app.get(`/${prefix}/health`, async (_, res) => {
+      try {
+        await  checkProductHealth();
+        res.status(201).send("ok");
+      } catch (error: any) {
+        log.info(error);
+        res.status(404).send('Degraded');
+      }
+      });
 
     /**
      * Retrieve all the products
