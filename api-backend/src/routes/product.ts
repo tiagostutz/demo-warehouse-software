@@ -14,7 +14,7 @@ export default {
      app.get(`/${prefix}/health`, async (_, res) => {
       try {
         await  checkProductHealth();
-        res.status(201).send("ok");
+        res.status(200).send("ok");
       } catch (error: any) {
         log.info(error);
         res.status(404).send('Degraded');
