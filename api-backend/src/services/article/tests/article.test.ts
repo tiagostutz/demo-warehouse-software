@@ -1,3 +1,4 @@
+import { request } from 'http';
 import { upsert, get, checkArticleHealth } from '..';
 import { prisma } from '../../prisma-client';
 
@@ -92,4 +93,9 @@ describe('Testing CRUD Operations', () => {
     const result = await checkArticleHealth();
     expect(result).not.toBeNull();
   });
+  test('check for article health status code', async () => {
+    request('http://localhost:4000/article/health', (res) => {
+      expect(res.statusCode).toEqual(200);
+    })
+   });
 });

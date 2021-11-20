@@ -23,7 +23,7 @@ export default {
         res.status(200).send("ok");
       } catch (error: any) {
         log.info(error);
-        res.status(404).send('Degraded');
+        res.status(500).send('Degraded');
       }
       });
 

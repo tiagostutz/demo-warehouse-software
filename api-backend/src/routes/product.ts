@@ -1,6 +1,6 @@
 import express from 'express';
 import { log } from '../logger';
-import { getAll, getAllWithAvailability, upsert } from '../services/product';
+import { checkProductHealth, getAll, getAllWithAvailability, upsert } from '../services/product';
 import { serializeNonDefaultTypes } from './utils';
 
 export default {
@@ -17,7 +17,7 @@ export default {
         res.status(200).send("ok");
       } catch (error: any) {
         log.info(error);
-        res.status(404).send('Degraded');
+        res.status(500).send('Degraded');
       }
       });
 
