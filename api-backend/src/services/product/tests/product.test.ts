@@ -320,10 +320,8 @@ describe('Testing Product relationship with Article', () => {
   test('Attempt to query count to check db connection', async () => {
     const result = await checkProductHealth();
     expect(result).not.toBeNull();
-  });
-  test('check for product health status code', async () => {
-   request('http://localhost:4000/product/health', (res) => {
-     expect(res.statusCode).toEqual(200);
-   })
+    request('http://localhost:4000/product/health', (res) => {
+      expect(res.statusCode).toEqual(200);
+    })
   });
 });

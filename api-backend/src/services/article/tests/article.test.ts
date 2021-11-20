@@ -92,10 +92,8 @@ describe('Testing CRUD Operations', () => {
   test('Attempt to query count to check db connection', async () => {
     const result = await checkArticleHealth();
     expect(result).not.toBeNull();
-  });
-  test('check for article health status code', async () => {
     request('http://localhost:4000/article/health', (res) => {
       expect(res.statusCode).toEqual(200);
     })
-   });
+  });
 });
