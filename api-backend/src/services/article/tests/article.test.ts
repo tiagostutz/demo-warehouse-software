@@ -1,4 +1,5 @@
-import { upsert, get } from '..';
+import { request } from 'http';
+import { upsert, get, checkArticleHealth } from '..';
 import { prisma } from '../../prisma-client';
 
 const identificationMockBigInt = BigInt(20211010090012331);
@@ -83,5 +84,16 @@ describe('Testing CRUD Operations', () => {
     const resultGet = await get(result.article?.id!);
     expect(resultGet.error).toBeNull();
     expect(resultGet.article?.identification).toBe(identificationMockBigInt);
+  });
+
+  /**
+   * queries the number of rows to check db connection
+   */
+  test('Attempt to query count to check db connection', async () => {
+    const result = await checkArticleHealth();
+    expect(result).not.toBeNull();
+    request('http://localhost:4000/article/health', (res) => {
+      expect(res.statusCode).toEqual(200);
+    })
   });
 });

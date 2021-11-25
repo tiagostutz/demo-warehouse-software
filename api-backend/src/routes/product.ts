@@ -1,6 +1,6 @@
 import express from 'express';
 import { log } from '../logger';
-import { getAll, getAllWithAvailability, upsert } from '../services/product';
+import { checkProductHealth, getAll, getAllWithAvailability, upsert } from '../services/product';
 import { serializeNonDefaultTypes } from './utils';
 
 export default {
@@ -11,7 +11,15 @@ export default {
      * - 204 : the service is OK
      * - 404 : the service is Degraded
      */
-    app.get(`/${prefix}/health`, async (_, res) => res.status(204).send());
+     app.get(`/${prefix}/health`, async (_, res) => {
+      try {
+        await  checkProductHealth();
+        res.status(200).send("ok");
+      } catch (error: any) {
+        log.info(error);
+        res.status(500).send('Degraded');
+      }
+      });
 
     /**
      * Retrieve all the products

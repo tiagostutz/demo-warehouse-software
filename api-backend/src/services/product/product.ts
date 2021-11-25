@@ -25,6 +25,14 @@ export type ProductReturnList<T extends Product> = {
 // ------
 
 /**
+ * Checks db connection by simple query
+ */
+
+ export const checkProductHealth = async () => {
+  return await prisma.product.count();
+}
+
+/**
  * Writes a Product to the database
  *
  * @param Product Product to be created

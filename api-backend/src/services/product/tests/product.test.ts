@@ -1,7 +1,8 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../../prisma-client';
-import { upsert as upserProduct, getAll, get as getProduct } from '..';
+import { upsert as upserProduct, getAll, get as getProduct, checkProductHealth } from '..';
 import { upsert as upserArticle } from '../../article';
+import { request } from 'http';
 
 const priceDecimal = new Prisma.Decimal(14.5);
 
@@ -311,5 +312,16 @@ describe('Testing Product relationship with Article', () => {
     const resultGet = await getAll();
     expect(resultGet.products?.length).toBe(0);
     expect(resultGet.error).toBeNull();
+  });
+
+  /**
+   * queries the number of rows to check db connection
+   */
+  test('Attempt to query count to check db connection', async () => {
+    const result = await checkProductHealth();
+    expect(result).not.toBeNull();
+    request('http://localhost:4000/product/health', (res) => {
+      expect(res.statusCode).toEqual(200);
+    })
   });
 });
