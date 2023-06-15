@@ -1,5 +1,17 @@
-# Demo Warehouse Software
+[![This is a Poppins project](https://raw.githubusercontent.com/bancodobrasil/poppins/master/badge-poppins.svg)](https://github.com/bancodobrasil/poppins)
+## This project was made for first-time contributors and open source beginners
 
+This project follows the [Poppins manifesto guidelines](https://github.com/bancodobrasil/poppins) as part of it's community principles and policies, focusing all the decisions and interactions on providing open source beginners mentorship with real and relevant experiences, respecting each learning pace, background experience, academic formation, questions, suggestions, doubts and opinion. 
+
+## Contribute now!
+
+So, let's start contributing! **Open an issue asking for a task to be done by you**. A mentor/maintainer will come and provide a technical overview of the project and what are the possibles ways of contributing to the project. You will discuss the options and a suitable issue will be assigned or created to you. 
+
+That's it. Just make yourself at home and good luck!
+
+<br/>
+
+# Demo Warehouse Software
 A simple demo of a warehouse software with TypeScript, PostgreSQL, Prisma, Go, NextJS...
 
 ![sample interaction](assets/simple-interaction.gif)
@@ -322,3 +334,13 @@ The warehouse should have at least the following functionality;
 
 - Get all products and quantity of each that is available with the current inventory
 - Remove(Sell) a product and update the inventory accordingly
+
+
+## Awesome Poppins projects looking for contributors:
+
+Here's a list of some more curated Poppins projects:
+- [First Contributions Repository](https://github.com/firstcontributions/first-contributions): This project is designed to help beginners make their very first contributions to open source projects. 
+- [Contribute to this Project](https://github.com/Syknapse/Contribute-To-This-Project): This is for absolute beginners. If you know how to write and edit an anchor tag <a href="" target=""></a> then you're ready to start contributing! 
+- [Contribute to open source](https://github.com/danthareja/contribute-to-open-source):
+Learn the GitHub workflow by contributing code in a fun simulation project.
+- [goodfirstissue.dev](https://github.com/deepsourcelabs/good-first-issue): goodfirstissue.dev has a list of project repositories with the `good first issue` tag. Project moderators add this tag to help beginners get involved with their projects. 
